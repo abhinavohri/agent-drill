@@ -9,16 +9,21 @@ from pydantic import BaseModel, ConfigDict, JsonValue
 
 class RunStatus(StrEnum):
     RUNNING = "running"
+    COMPLETED = "completed"
     STOPPED = "stopped"
     FAILED = "failed"
 
 
 class RunEventType(StrEnum):
     RUN_STARTED = "run_started"
+    MESSAGE = "message"
     TOOL_CALL = "tool_call"
     TOOL_RESULT = "tool_result"
     TOOL_ERROR = "tool_error"
+    STATE_CHANGED = "state_changed"
+    RUN_COMPLETED = "run_completed"
     RUN_STOPPED = "run_stopped"
+    RUN_FAILED = "run_failed"
 
 
 class RunEvent(BaseModel):
@@ -40,6 +45,7 @@ class SimulationRun(BaseModel):
     action_count: int
     max_actions: int
     events: tuple[RunEvent, ...]
+    final_state: dict[str, JsonValue] | None = None
 
 
 @dataclass
@@ -51,6 +57,7 @@ class RunRecord:
     max_actions: int
     action_count: int = 0
     events: list[RunEvent] = field(default_factory=list)
+    final_state: dict[str, JsonValue] | None = None
 
     def append(self, event_type: RunEventType, payload: dict[str, JsonValue]) -> None:
         self.events.append(
@@ -71,5 +78,6 @@ class RunRecord:
             action_count=self.action_count,
             max_actions=self.max_actions,
             events=tuple(self.events),
+            final_state=self.final_state,
         )
 

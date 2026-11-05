@@ -23,5 +23,7 @@ main and jobs -> domain facade -> domain internal code
 
 The `drill_mcp` domain can import the `simulations` facade. It must not import simulation internal files.
 
+The `drill_mcp` domain uses the `refunds` facade to connect the MCP protocol to the stateful refund world. The refund feature has no network client.
+
 `app/main.py` assembles the HTTP application. `app/jobs/drill_mcp.py` is the stable stdio MCP entry point.
 

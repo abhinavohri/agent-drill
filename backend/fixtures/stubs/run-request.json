@@ -1,0 +1,8 @@
+{
+  "agentId": "refund-agent",
+  "agentVersion": "fixture-v1",
+  "workflowId": "refund-review",
+  "scenarioId": "disputed-payment-750",
+  "maxActions": 20,
+  "timeoutSeconds": 60
+}

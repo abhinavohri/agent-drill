@@ -8,7 +8,7 @@ from pydantic import JsonValue
 
 from app.drill_mcp.internal.models import ToolDefinition, ToolResult
 from app.drill_mcp.internal.providers.upstream import UpstreamToolClient
-from app.simulations.facade import SimulationService
+from app.simulations.facade import ActionLimitExceededError, SimulationService
 
 
 class ToolNotAllowedError(PermissionError):
@@ -57,7 +57,11 @@ class DrillProxyService:
     ) -> ToolResult:
         tool = self._get_allowed_tool(tool_name)
         self._validate_arguments(tool, arguments)
-        self._simulations.record_tool_call(run_id, tool_name, arguments)
+        try:
+            self._simulations.record_tool_call(run_id, tool_name, arguments)
+        except ActionLimitExceededError as exc:
+            await self._simulations.fail_run(run_id, str(exc))
+            raise
 
         try:
             async with asyncio.timeout(self._timeout_seconds):
@@ -72,6 +76,8 @@ class DrillProxyService:
             raise UpstreamToolError(message) from exc
 
         self._simulations.record_tool_result(run_id, tool_name, result.data)
+        if result.state_change is not None:
+            self._simulations.record_state_change(run_id, tool_name, result.state_change)
         return result
 
     async def close(self) -> None:

@@ -2,9 +2,11 @@
 
 ## Upstream MCP provider
 
-The upstream MCP provider owns connection and calls to the target agent's existing MCP server. The first implementation is an explicit mock.
+The upstream MCP provider owns tool discovery and execution for the Drill MCP server. Local runs use the stateful refund world. The explicit mock remains available for focused proxy tests.
 
 A real provider must return validated tool definitions and typed tool results. It must own transport errors and connection cleanup.
+
+Do not connect the simulation runtime to a production tool endpoint. Use a synthetic world, an official sandbox, or a dedicated test tenant.
 
 ## Sandbox provider
 

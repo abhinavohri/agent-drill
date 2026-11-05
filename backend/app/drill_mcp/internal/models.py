@@ -16,4 +16,5 @@ class ToolResult(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     data: dict[str, JsonValue]
+    state_change: dict[str, JsonValue] | None = None
 

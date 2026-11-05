@@ -17,6 +17,8 @@ These rules apply to all files in `backend/`.
 - Do not import another domain's `internal/` package.
 - Keep `app/main.py` limited to application assembly and process lifecycle work.
 - Keep `app/jobs/` as the stable process entry-point package.
+- Keep temporary cross-team input records in `fixtures/stubs/` until the shared contracts replace them.
+- Keep production-trace samples in `fixtures/production_traces/`. Remove secrets and customer data first.
 
 ## Responsibilities
 
@@ -25,6 +27,7 @@ These rules apply to all files in `backend/`.
 - An internal service owns business logic.
 - A provider client owns one external API or protocol contract.
 - A parser converts untrusted source data into validated application data.
+- The simulation runtime records live run events. The evaluation workstream owns production-trace ingestion and conversion to scenarios.
 
 ## Change rules
 

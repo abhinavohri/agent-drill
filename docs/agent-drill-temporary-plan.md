@@ -462,11 +462,12 @@ The hackathon MVP includes:
 - Event traces
 - Failed-scenario reruns
 - A Markdown release report
+- One redacted production trace import format
 
 The MVP does not include:
 
 - A separate dashboard
-- Automatic production trace import
+- Multi-provider automatic trace import
 - Automatic copies of external services
 - CI integration
 - Arbitrary OpenAPI or MCP imports
