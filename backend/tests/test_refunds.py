@@ -102,6 +102,10 @@ class RefundWorldTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValidationError):
             await self.provider.call_tool("get_payment", {"paymentId": None})
 
+    async def test_rejects_unknown_tool_before_world_call(self) -> None:
+        with self.assertRaises(LookupError):
+            await self.provider.call_tool("delete_account", {})
+
     async def test_proxy_records_state_change_and_final_state(self) -> None:
         sandbox = MockSandbox()
         simulations = SimulationService(sandbox)
