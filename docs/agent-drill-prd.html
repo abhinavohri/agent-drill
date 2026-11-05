@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Product requirements document for Agent Drill">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2311141a'/%3E%3Cpath d='M9 22 15 9h2l6 13h-3l-1.3-3H13l-1.3 3H9Zm5.1-5.6h3.6L16 12.3l-1.9 4.1Z' fill='%23f4b860'/%3E%3C/svg%3E">
+  <title>Agent Drill — Product requirements document</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d12;
+      --sidebar: #080a0e;
+      --surface: #11141a;
+      --raised: #171b23;
+      --strong: #202631;
+      --line: rgba(238, 240, 245, 0.09);
+      --line-strong: rgba(238, 240, 245, 0.17);
+      --text: #eef0f5;
+      --secondary: #a3a9b8;
+      --muted: #7d8595;
+      --accent: #f4b860;
+      --positive: #4cc38a;
+      --negative: #e65c62;
+      --max: 1480px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Geist, Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    button, a { font: inherit; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    .shell {
+      width: min(100%, var(--max));
+      min-height: 100vh;
+      margin: 0 auto;
+      border-inline: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 256px minmax(0, 1fr);
+    }
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 16px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+    .brand { min-height: 36px; padding: 0 8px; display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-mark {
+      width: 22px; height: 22px; border: 1px solid var(--line-strong); border-radius: 6px;
+      color: var(--accent); display: grid; place-items: center;
+      font: 500 11px/1 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+    .brand-name { font-size: 16px; font-weight: 600; }
+    .doc-meta { margin: 20px 8px 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .meta-row { display: flex; justify-content: space-between; gap: 12px; color: var(--secondary); font-size: 12px; }
+    .meta-row + .meta-row { margin-top: 8px; }
+    .mono { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-variant-numeric: tabular-nums; }
+    .nav-label { margin: 28px 8px 8px; color: var(--muted); font-size: 12px; }
+    .nav { display: grid; gap: 2px; }
+    .nav a {
+      min-height: 34px; padding: 7px 8px; border-radius: 7px; color: var(--secondary);
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+      transition: color 140ms var(--ease), background-color 140ms var(--ease);
+    }
+    .nav a:hover, .nav a[aria-current="true"] { color: var(--text); background: var(--raised); }
+    .nav-index { width: 22px; color: var(--muted); font: 400 11px/1 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .side-note { margin-top: auto; padding: 16px 8px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+
+    .main { min-width: 0; }
+    .hero { padding: 80px 48px 64px; border-bottom: 1px solid var(--line); }
+    .eyebrow { margin: 0 0 16px; color: var(--accent); font: 500 12px/1.4 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 900px; margin-bottom: 24px; font-size: clamp(52px, 6vw, 76px); font-weight: 450; line-height: 1.02; letter-spacing: -0.035em; }
+    .hero-summary { max-width: 780px; margin: 0 0 48px; color: var(--secondary); font-size: 19px; line-height: 1.6; }
+
+    .product-flow { border: 1px solid var(--line-strong); border-radius: 16px; background: var(--surface); overflow: hidden; }
+    .flow-head { min-height: 48px; padding: 0 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .flow-head strong { font-size: 13px; font-weight: 500; }
+    .flow-head span { color: var(--muted); font: 400 11px/1 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .flow-body { padding: 28px; display: grid; grid-template-columns: repeat(9, auto); align-items: center; justify-content: center; gap: 12px; }
+    .flow-node { min-width: 152px; min-height: 112px; padding: 18px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--raised); }
+    .flow-node.accent { border-color: rgba(244,184,96,.4); background: rgba(244,184,96,.06); }
+    .flow-node strong { display: block; font-size: 14px; font-weight: 500; }
+    .flow-node span { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .arrow { color: var(--muted); font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; text-align: center; }
+
+    .section { padding: 96px 48px; border-bottom: 1px solid var(--line); scroll-margin-top: 24px; }
+    .section-head { max-width: 820px; margin-bottom: 48px; }
+    .section-number { margin-bottom: 16px; color: var(--accent); font: 500 12px/1 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    h2 { margin-bottom: 16px; font-size: clamp(34px, 4vw, 52px); font-weight: 450; line-height: 1.08; letter-spacing: -0.025em; }
+    .section-summary { margin-bottom: 0; color: var(--secondary); font-size: 17px; line-height: 1.65; }
+    h3 { margin-bottom: 10px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+
+    .definition-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 24px; }
+    .problem { padding: 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .problem p { color: var(--secondary); }
+    .problem p:last-child { margin-bottom: 0; }
+    .promise { padding: 28px; border: 1px solid rgba(244,184,96,.34); border-radius: 14px; background: rgba(244,184,96,.05); }
+    .promise blockquote { margin: 24px 0 0; font-size: 24px; line-height: 1.4; letter-spacing: -0.015em; }
+
+    .goals { margin-top: 24px; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+    .list-panel { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .list-head { min-height: 56px; padding: 0 18px; border-bottom: 1px solid var(--line); background: #0e1117; display: flex; align-items: center; justify-content: space-between; }
+    .list-head strong { font-size: 14px; font-weight: 500; }
+    .list-head span { color: var(--muted); font: 400 11px/1 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .plain-list { margin: 0; padding: 0; list-style: none; }
+    .plain-list li { min-height: 48px; padding: 13px 18px 13px 44px; border-bottom: 1px solid var(--line); color: var(--secondary); position: relative; }
+    .plain-list li:last-child { border-bottom: 0; }
+    .plain-list li::before { position: absolute; left: 18px; top: 14px; font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .included li::before { content: "+"; color: var(--positive); }
+    .excluded li::before { content: "—"; color: var(--muted); }
+
+    .table-wrap { border: 1px solid var(--line); border-radius: 14px; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-weight: 400; background: #0e1117; white-space: nowrap; }
+    td { color: var(--secondary); background: var(--surface); }
+    tr:last-child td { border-bottom: 0; }
+    td strong { color: var(--text); font-weight: 500; }
+    td code { color: var(--accent); font-size: 11px; }
+
+    .target-agent { margin-top: 32px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: grid; grid-template-columns: .8fr 1.2fr; }
+    .target-copy { padding: 28px; background: var(--surface); }
+    .target-copy p { color: var(--secondary); }
+    .target-copy p:last-child { margin-bottom: 0; }
+    .tool-list { padding: 28px; background: #0e1117; border-left: 1px solid var(--line); }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .tool { min-height: 30px; padding: 6px 9px; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--secondary); font: 400 11px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+
+    .journey { display: grid; grid-template-columns: repeat(8, minmax(0,1fr)); border-top: 1px solid var(--line-strong); }
+    .journey-step { position: relative; padding: 28px 16px 0 0; }
+    .journey-step::before { content: ""; position: absolute; top: -5px; left: 0; width: 9px; height: 9px; border: 2px solid var(--bg); border-radius: 50%; background: var(--accent); }
+    .journey-step span { display: block; margin-bottom: 10px; color: var(--muted); font: 400 10px/1 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .journey-step strong { display: block; font-size: 13px; font-weight: 500; }
+    .journey-step p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+
+    .workflow-map { margin-top: 40px; display: grid; grid-template-columns: 1fr 48px 1fr 48px 1fr; align-items: stretch; }
+    .map-node { min-height: 168px; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .map-node strong { display: block; font-size: 17px; font-weight: 500; }
+    .map-count { display: block; margin: 24px 0 8px; color: var(--accent); font: 500 26px/1 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .map-node p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    .requirements { display: grid; gap: 32px; }
+    .requirement-group h3 { margin-bottom: 14px; }
+    .req-id { color: var(--accent); font: 400 11px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace; white-space: nowrap; }
+    .priority { color: var(--muted); font: 400 10px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+
+    .architecture { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+    .plane { display: grid; grid-template-columns: 168px minmax(0,1fr); min-height: 184px; }
+    .plane + .plane { border-top: 1px solid var(--line); }
+    .plane-label { padding: 24px; border-right: 1px solid var(--line); background: #0e1117; }
+    .plane-label strong { display: block; font-size: 14px; font-weight: 500; }
+    .plane-label span { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .plane-flow { padding: 28px; display: grid; grid-template-columns: repeat(7, auto); align-items: center; justify-content: center; gap: 12px; background: var(--surface); }
+    .arch-node { min-width: 132px; min-height: 76px; padding: 14px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--raised); }
+    .arch-node.accent { border-color: rgba(244,184,96,.4); background: rgba(244,184,96,.06); }
+    .arch-node strong { display: block; font-size: 13px; font-weight: 500; }
+    .arch-node span { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .arch-note { margin-top: 24px; padding: 20px 24px; border-left: 2px solid var(--accent); background: rgba(244,184,96,.05); color: var(--secondary); }
+    .arch-note strong { color: var(--text); font-weight: 500; }
+
+    .evaluation { display: grid; grid-template-columns: minmax(0,1fr) 240px; gap: 24px; }
+    .check-list { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; counter-reset: checks; }
+    .check { min-height: 76px; padding: 16px 72px 16px 60px; border-bottom: 1px solid var(--line); background: var(--surface); position: relative; counter-increment: checks; }
+    .check:last-child { border-bottom: 0; }
+    .check::before { content: counter(checks, decimal-leading-zero); position: absolute; left: 20px; top: 18px; color: var(--muted); font: 400 11px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .check::after { position: absolute; right: 16px; top: 18px; font: 400 10px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .check.hard::after { content: "hard"; color: var(--negative); }
+    .check.review::after { content: "review"; color: var(--accent); }
+    .check strong { display: block; font-size: 14px; font-weight: 500; }
+    .check span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .verdicts { display: grid; gap: 8px; }
+    .verdict { min-height: 92px; padding: 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .verdict strong { display: block; font-size: 14px; font-weight: 500; }
+    .verdict span { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; }
+    .verdict.fail strong { color: var(--negative); }
+    .verdict.pass strong { color: var(--positive); }
+    .verdict.review strong { color: var(--accent); }
+
+    .contracts { margin-top: 32px; display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .contract { min-height: 132px; padding: 18px; background: var(--surface); }
+    .contract + .contract { border-left: 1px solid var(--line); }
+    .contract code { display: block; margin-bottom: 24px; color: var(--accent); font-size: 11px; }
+    .contract strong { display: block; font-size: 13px; font-weight: 500; }
+    .contract span { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+
+    .ownership-intro { margin-bottom: 32px; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--secondary); }
+    .ownership-intro strong { color: var(--text); font-weight: 500; }
+    .owner-grid { display: grid; gap: 24px; }
+    .owner { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .owner-head { padding: 20px 24px; border-bottom: 1px solid var(--line); background: #0e1117; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .owner-name { display: flex; align-items: baseline; gap: 12px; }
+    .owner-name strong { font-size: 20px; font-weight: 500; }
+    .owner-name span { color: var(--secondary); font-size: 13px; }
+    .owner-path { color: var(--accent); font: 400 11px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+    .owner-body { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .owner-block { min-height: 188px; padding: 20px; background: var(--surface); }
+    .owner-block + .owner-block { border-left: 1px solid var(--line); }
+    .owner-block h3 { margin-bottom: 14px; font-size: 13px; }
+    .owner-block ul { margin: 0; padding: 0 0 0 16px; color: var(--secondary); font-size: 12px; }
+    .owner-block li + li { margin-top: 7px; }
+    .owner-block code { color: var(--accent); font-size: 11px; }
+
+    .matrix { margin-top: 32px; }
+    .handoff { color: var(--accent); font: 400 11px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace; }
+
+    .acceptance-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+    .acceptance { padding: 20px; border-top: 1px solid var(--line-strong); }
+    .acceptance strong { display: block; font-size: 14px; font-weight: 500; }
+    .acceptance p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+
+    .footer { padding: 48px; display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
+    .footer strong { display: block; margin-bottom: 8px; font-size: 22px; font-weight: 500; }
+    .footer p { margin: 0; color: var(--muted); font-size: 12px; }
+    .footer-links { display: flex; gap: 16px; color: var(--secondary); font-size: 12px; }
+
+    @media (max-width: 1180px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { position: sticky; height: auto; min-height: 56px; padding: 10px 20px; border-right: 0; border-bottom: 1px solid var(--line); flex-direction: row; align-items: center; }
+      .doc-meta, .nav-label, .nav, .side-note { display: none; }
+      .flow-body, .plane-flow { justify-content: start; overflow: auto; }
+      .owner-body { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .owner-block:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
+      .owner-block:nth-child(4) { border-top: 1px solid var(--line); }
+    }
+    @media (max-width: 820px) {
+      .hero, .section, .footer { padding-left: 24px; padding-right: 24px; }
+      .hero { padding-top: 64px; }
+      h1 { font-size: 44px; }
+      .definition-grid, .goals, .target-agent, .evaluation, .acceptance-grid { grid-template-columns: 1fr; }
+      .tool-list { border-left: 0; border-top: 1px solid var(--line); }
+      .journey { grid-template-columns: repeat(2, minmax(0,1fr)); border-top: 0; border-left: 1px solid var(--line-strong); }
+      .journey-step { padding: 0 16px 28px 28px; }
+      .journey-step::before { top: 5px; left: -5px; }
+      .workflow-map { grid-template-columns: 1fr; }
+      .workflow-map .arrow { transform: rotate(90deg); min-height: 28px; }
+      .plane { grid-template-columns: 1fr; }
+      .plane-label { border-right: 0; border-bottom: 1px solid var(--line); }
+      .contracts { grid-template-columns: 1fr; }
+      .contract + .contract { border-left: 0; border-top: 1px solid var(--line); }
+      .owner-body { grid-template-columns: 1fr; }
+      .owner-block + .owner-block, .owner-block:nth-child(3), .owner-block:nth-child(4) { border-left: 0; border-top: 1px solid var(--line); }
+      .owner-head { align-items: flex-start; flex-direction: column; }
+      .footer { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 520px) {
+      .journey { grid-template-columns: 1fr; }
+      .owner-path { overflow-wrap: anywhere; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    @media print {
+      :root { color-scheme: light; --bg:#fff; --sidebar:#fff; --surface:#fff; --raised:#f3f4f6; --strong:#e5e7eb; --line:rgba(17,24,39,.12); --line-strong:rgba(17,24,39,.22); --text:#111827; --secondary:#4b5563; --muted:#6b7280; }
+      .shell { display:block; border:0; }
+      .sidebar { display:none; }
+      .hero, .section { padding:48px 0; }
+      .section, .owner { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" aria-label="PRD navigation">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">AD</span><span class="brand-name">Agent Drill</span></a>
+      <div class="doc-meta">
+        <div class="meta-row"><span>Document</span><span class="mono">PRD</span></div>
+        <div class="meta-row"><span>Status</span><span class="mono">Shareable draft</span></div>
+        <div class="meta-row"><span>Track</span><span class="mono">Business workflow</span></div>
+      </div>
+      <div class="nav-label">Contents</div>
+      <nav class="nav">
+        <a href="#overview"><span class="nav-index">01</span>Overview</a>
+        <a href="#users"><span class="nav-index">02</span>Users and agent</a>
+        <a href="#experience"><span class="nav-index">03</span>Experience</a>
+        <a href="#requirements"><span class="nav-index">04</span>Requirements</a>
+        <a href="#architecture"><span class="nav-index">05</span>Architecture</a>
+        <a href="#evaluation"><span class="nav-index">06</span>Evaluation</a>
+        <a href="#ownership"><span class="nav-index">07</span>Team ownership</a>
+        <a href="#acceptance"><span class="nav-index">08</span>Acceptance</a>
+      </nav>
+      <p class="side-note">No timeline is included. Work is separated by stable data contracts.</p>
+    </aside>
+
+    <main class="main" id="top">
+      <header class="hero">
+        <p class="eyebrow">Product requirements document · Draft 1.0</p>
+        <h1>Agent Drill</h1>
+        <p class="hero-summary">A shared simulation agent that lets technical teams and business experts test another AI agent before it receives production access.</p>
+
+        <div class="product-flow" aria-label="Agent Drill product flow">
+          <div class="flow-head"><strong>One complete release review</strong><span>configure → simulate → evaluate → approve</span></div>
+          <div class="flow-body">
+            <div class="flow-node"><strong>Team rules</strong><span>Policies, risks, and expected outcomes</span></div><div class="arrow">+</div>
+            <div class="flow-node"><strong>Target agent</strong><span>E-commerce support agent</span></div><div class="arrow">→</div>
+            <div class="flow-node accent"><strong>Agent Drill</strong><span>Stateful synthetic tools and trace capture</span></div><div class="arrow">→</div>
+            <div class="flow-node"><strong>Verdict</strong><span>Pass, fail, or human review</span></div><div class="arrow">→</div>
+            <div class="flow-node"><strong>Release decision</strong><span>Evidence and team approval in Switch</span></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="section" id="overview">
+        <div class="section-head">
+          <div class="section-number">01 / Overview</div>
+          <h2>Problem, promise, and scope</h2>
+          <p class="section-summary">Agent Drill tests agent behavior inside a controlled world. It focuses on tool use, state changes, policy compliance, and team approval.</p>
+        </div>
+
+        <div class="definition-grid">
+          <article class="problem">
+            <h3>Problem</h3>
+            <p>AI agents can issue refunds, update records, send messages, and make other business changes. Prompt tests do not show whether an agent will use these tools safely.</p>
+            <p>Teams need a repeatable test that does not touch production and that explains the exact cause of a failure.</p>
+          </article>
+          <article class="promise">
+            <h3>Product promise</h3>
+            <blockquote>Connect an agent, run a realistic scenario, inspect every action, and decide whether the agent is safe to release.</blockquote>
+          </article>
+        </div>
+
+        <div class="goals">
+          <div class="list-panel">
+            <div class="list-head"><strong>Goals</strong><span>MVP</span></div>
+            <ul class="plain-list included">
+              <li>Connect a target agent through Switch and MCP</li>
+              <li>Run the target against stateful synthetic tools</li>
+              <li>Record tool calls, results, and state changes</li>
+              <li>Evaluate deterministic rules and open-ended output</li>
+              <li>Support team review, approval, and reruns</li>
+            </ul>
+          </div>
+          <div class="list-panel">
+            <div class="list-head"><strong>Non-goals</strong><span>Deferred</span></div>
+            <ul class="plain-list excluded">
+              <li>Automatic copies of arbitrary production services</li>
+              <li>Production trace ingestion and CI integration</li>
+              <li>Automatic workflow discovery</li>
+              <li>Parallel execution and cost regression analysis</li>
+              <li>A separate simulation dashboard</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="users">
+        <div class="section-head">
+          <div class="section-number">02 / Users and target agent</div>
+          <h2>Technical users connect the agent. Domain experts define safe behavior.</h2>
+          <p class="section-summary">The product can support any department. Each participant has a specific role in the release decision.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User group</th><th>Examples</th><th>Responsibility</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Operators</strong></td><td>Agent developers, AI engineers, QA engineers</td><td>Connect the target agent, configure tools, start runs, and fix failures</td></tr>
+              <tr><td><strong>Domain experts</strong></td><td>Support, finance, security, legal, operations</td><td>Define policies, risks, approval limits, and expected outcomes</td></tr>
+              <tr><td><strong>Approvers</strong></td><td>Engineering managers, finance controllers, security leads</td><td>Approve or block the agent release</td></tr>
+              <tr><td><strong>Viewers</strong></td><td>Executives, auditors, customers, risk teams</td><td>Review evidence, decisions, and run history</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="target-agent">
+          <div class="target-copy">
+            <h3>Target agent</h3>
+            <p>The MVP tests an autonomous e-commerce support agent. The agent can answer order questions, inspect payments, issue refunds, and escalate cases.</p>
+            <p>The hackathon demonstration focuses on one workflow: a refund request for a disputed payment above the finance approval limit.</p>
+          </div>
+          <div class="tool-list">
+            <h3>Simulated tools</h3>
+            <div class="tools">
+              <span class="tool">get_conversation</span>
+              <span class="tool">get_order</span>
+              <span class="tool">get_payment</span>
+              <span class="tool">get_delivery_status</span>
+              <span class="tool">get_refund_history</span>
+              <span class="tool">create_refund</span>
+              <span class="tool">send_customer_reply</span>
+              <span class="tool">escalate_to_human</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="experience">
+        <div class="section-head">
+          <div class="section-number">03 / Product experience</div>
+          <h2>One shared flow from setup to release decision</h2>
+          <p class="section-summary">Switch is the collaboration layer. Drill MCP is the simulation boundary. The room contains the team context, live progress, evidence, and final decision.</p>
+        </div>
+
+        <div class="journey" aria-label="Primary user journey">
+          <div class="journey-step"><span>01</span><strong>Create room</strong><p>Add Agent Drill, the target agent, and reviewers</p></div>
+          <div class="journey-step"><span>02</span><strong>Connect tools</strong><p>Point a test profile at Drill MCP</p></div>
+          <div class="journey-step"><span>03</span><strong>Select workflow</strong><p>Choose refund request</p></div>
+          <div class="journey-step"><span>04</span><strong>Approve scenario</strong><p>Confirm rules and synthetic state</p></div>
+          <div class="journey-step"><span>05</span><strong>Run agent</strong><p>Observe tool calls and state</p></div>
+          <div class="journey-step"><span>06</span><strong>Review verdict</strong><p>Inspect failed rules and evidence</p></div>
+          <div class="journey-step"><span>07</span><strong>Fix and rerun</strong><p>Repeat only failed scenarios</p></div>
+          <div class="journey-step"><span>08</span><strong>Approve release</strong><p>Save the decision in Switch</p></div>
+        </div>
+
+        <div class="workflow-map" aria-label="Agent, workflow, and scenario relationship">
+          <div class="map-node"><strong>Agent profile</strong><span class="map-count">1</span><p>Connection, capabilities, and available tools</p></div>
+          <div class="arrow">1 → n</div>
+          <div class="map-node"><strong>Workflows</strong><span class="map-count">n</span><p>Refund request, order lookup, delivery status, escalation</p></div>
+          <div class="arrow">1 → n</div>
+          <div class="map-node"><strong>Scenarios</strong><span class="map-count">n</span><p>Valid refund, dispute, duplicate, timeout, policy attack</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="requirements">
+        <div class="section-head">
+          <div class="section-number">04 / Product requirements</div>
+          <h2>Requirements for a complete simulation loop</h2>
+          <p class="section-summary">The first release must prove connection, stateful execution, deterministic evaluation, collaborative review, and reproducible reruns.</p>
+        </div>
+
+        <div class="requirements">
+          <div class="requirement-group">
+            <h3>Functional requirements</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="req-id">FR-01</span></td><td>Users can connect Agent Drill and a target agent to one Switch room.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">FR-02</span></td><td>The target agent can use a simulation-only MCP tool profile with no production credentials.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">FR-03</span></td><td>Users can register one agent with several workflows and select one workflow for a run.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">FR-04</span></td><td>Users can create, review, approve, and run a scenario from the Switch room.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">FR-05</span></td><td>Agent Drill records each message, tool call, tool result, and synthetic state change.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">FR-06</span></td><td>The evaluator produces pass, fail, or review with rule-level evidence.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">FR-07</span></td><td>Users can stop a run and rerun failed scenarios with clean state.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">FR-08</span></td><td>Agent Drill creates a final Markdown report in the Switch room.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">FR-09</span></td><td>Users can compare an original run with its rerun.</td><td><span class="priority">Should</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="requirement-group">
+            <h3>Safety and quality requirements</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Requirement</th><th>Priority</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="req-id">SQ-01</span></td><td>A run must not have production credentials or production tool endpoints.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">SQ-02</span></td><td>Every tool call must pass schema validation before execution.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">SQ-03</span></td><td>Each scenario must start from isolated and reproducible state.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">SQ-04</span></td><td>Every run must enforce an action limit and timeout.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">SQ-05</span></td><td>A language-model evaluator must not override a deterministic rule failure.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">SQ-06</span></td><td>Fixtures and reports must not contain production secrets or customer data.</td><td><span class="priority">Must</span></td></tr>
+                  <tr><td><span class="req-id">SQ-07</span></td><td>A new developer can reproduce the demonstration from the repository instructions.</td><td><span class="priority">Must</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="architecture">
+        <div class="section-head">
+          <div class="section-number">05 / System architecture</div>
+          <h2>Switch controls the collaboration. Drill MCP controls the synthetic world.</h2>
+          <p class="section-summary">The system separates team coordination from tool execution. This separation lets the target agent run normal reasoning without access to production systems.</p>
+        </div>
+
+        <div class="architecture">
+          <div class="plane">
+            <div class="plane-label"><strong>Control plane</strong><span>People, context, commands, and approval</span></div>
+            <div class="plane-flow">
+              <div class="arch-node"><strong>Reviewers</strong><span>Policies and decisions</span></div><div class="arrow">⇄</div>
+              <div class="arch-node"><strong>Switch room</strong><span>Messages and history</span></div><div class="arrow">⇄</div>
+              <div class="arch-node accent"><strong>Agent Drill</strong><span>Run orchestration</span></div><div class="arrow">⇄</div>
+              <div class="arch-node"><strong>Target agent</strong><span>Scenario request</span></div>
+            </div>
+          </div>
+          <div class="plane">
+            <div class="plane-label"><strong>Execution plane</strong><span>Tools, state, events, and evaluation</span></div>
+            <div class="plane-flow">
+              <div class="arch-node"><strong>Target runtime</strong><span>Normal agent logic</span></div><div class="arrow">→</div>
+              <div class="arch-node accent"><strong>Drill MCP</strong><span>Simulated tools</span></div><div class="arrow">→</div>
+              <div class="arch-node"><strong>Synthetic world</strong><span>Isolated JSON state</span></div><div class="arrow">→</div>
+              <div class="arch-node"><strong>Evaluator</strong><span>Evidence and verdict</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-note"><strong>Run identity:</strong> every run pins one <code>agentId</code>, one <code>workflowId</code>, one <code>scenarioId</code>, and one agent version. Agent Drill does not silently select a high-risk workflow.</div>
+
+        <div class="contracts" aria-label="Shared data contracts">
+          <div class="contract"><code>AgentConfig</code><strong>Connection</strong><span>Agent identity, tools, and workflows</span></div>
+          <div class="contract"><code>WorkflowSpec</code><strong>Behavior</strong><span>Stages, rules, and valid outcomes</span></div>
+          <div class="contract"><code>Scenario</code><strong>Test case</strong><span>Input, synthetic state, and faults</span></div>
+          <div class="contract"><code>RunEvent</code><strong>Evidence</strong><span>Ordered messages, calls, and changes</span></div>
+          <div class="contract"><code>RunResult</code><strong>Decision</strong><span>Verdict, violations, and report</span></div>
+        </div>
+      </section>
+
+      <section class="section" id="evaluation">
+        <div class="section-head">
+          <div class="section-number">06 / Evaluation model</div>
+          <h2>Hard rules decide safety. Human review resolves uncertainty.</h2>
+          <p class="section-summary">Correctness is not one expected sentence. Agent Drill checks the complete action trace, final state, output, and required approvals.</p>
+        </div>
+
+        <div class="evaluation">
+          <div class="check-list">
+            <div class="check hard"><strong>Input schema</strong><span>Required fields exist and use valid types</span></div>
+            <div class="check hard"><strong>Tool permissions</strong><span>The agent calls only declared tools with valid arguments</span></div>
+            <div class="check hard"><strong>Action order and invariants</strong><span>Required reads occur before writes and forbidden state changes never occur</span></div>
+            <div class="check hard"><strong>Final state</strong><span>The synthetic world ends in an allowed state</span></div>
+            <div class="check review"><strong>Semantic output</strong><span>The response is accurate, complete, and suitable for the customer</span></div>
+            <div class="check review"><strong>Human approval</strong><span>An authorized reviewer approves restricted actions and release</span></div>
+          </div>
+          <div class="verdicts">
+            <div class="verdict fail"><strong>Fail</strong><span>Any hard rule fails. The agent release is blocked.</span></div>
+            <div class="verdict review"><strong>Review</strong><span>Hard rules pass, but quality or approval remains uncertain.</span></div>
+            <div class="verdict pass"><strong>Pass</strong><span>Rules, final state, expected outcome, and approvals match.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="ownership">
+        <div class="section-head">
+          <div class="section-number">07 / Team ownership</div>
+          <h2>Four independent workstreams with explicit handoffs</h2>
+          <p class="section-summary">Each owner can work against checked JSON fixtures. Integration uses stable records instead of shared internal code.</p>
+        </div>
+
+        <div class="ownership-intro"><strong>Shared rule:</strong> the team freezes <code>AgentConfig</code>, <code>WorkflowSpec</code>, <code>Scenario</code>, <code>RunEvent</code>, and <code>RunResult</code> before parallel work. Ojas maintains the shared contract files after team approval.</div>
+
+        <div class="owner-grid">
+          <article class="owner">
+            <div class="owner-head"><div class="owner-name"><strong>Ojas</strong><span>Switch integration and orchestration</span></div><span class="owner-path">apps/switch-agent · packages/contracts</span></div>
+            <div class="owner-body">
+              <div class="owner-block"><h3>Owns</h3><ul><li>Switch connection and room events</li><li>Target-agent discovery and addressing</li><li>Run, stop, rerun, and approval commands</li><li>Run status and final report delivery</li><li>Shared contract file maintenance</li></ul></div>
+              <div class="owner-block"><h3>Consumes</h3><ul><li><code>AgentConfig</code></li><li><code>WorkflowSpec</code> and <code>Scenario</code></li><li>Mock <code>RunEvent</code> stream</li><li>Mock <code>RunResult</code></li></ul></div>
+              <div class="owner-block"><h3>Produces</h3><ul><li>Validated <code>RunRequest</code></li><li>Commands for the simulation runtime</li><li>Human approval events</li><li>Switch messages and room report</li></ul></div>
+              <div class="owner-block"><h3>Independent completion</h3><ul><li>Use fixed pass and fail run fixtures</li><li>Use a mock simulation endpoint</li><li>Prove two agents can share one room</li><li>Start, stop, and report a mock run</li></ul></div>
+            </div>
+          </article>
+
+          <article class="owner">
+            <div class="owner-head"><div class="owner-name"><strong>Abhinav</strong><span>Simulation engine and synthetic world</span></div><span class="owner-path">packages/simulator · packages/drill-mcp</span></div>
+            <div class="owner-body">
+              <div class="owner-block"><h3>Owns</h3><ul><li>Drill MCP server</li><li>Refund tool schemas and handlers</li><li>Isolated scenario state</li><li>Fault injection and runtime limits</li><li>Ordered run-event recording</li></ul></div>
+              <div class="owner-block"><h3>Consumes</h3><ul><li><code>RunRequest</code></li><li><code>Scenario</code></li><li>Target-agent MCP calls</li><li>Static agent responses for testing</li></ul></div>
+              <div class="owner-block"><h3>Produces</h3><ul><li>Ordered <code>RunEvent</code> stream</li><li>Final synthetic state</li><li>Runtime errors and completion status</li><li>Reproducible JSON event fixture</li></ul></div>
+              <div class="owner-block"><h3>Independent completion</h3><ul><li>Use static scenario JSON</li><li>Call tools with a small MCP client</li><li>Prove no production endpoint is reachable</li><li>Test timeout, invalid arguments, and clean reset</li></ul></div>
+            </div>
+          </article>
+
+          <article class="owner">
+            <div class="owner-head"><div class="owner-name"><strong>Maqsud</strong><span>Workflows, scenarios, evaluation, and reports</span></div><span class="owner-path">packages/evaluator · fixtures/refunds</span></div>
+            <div class="owner-body">
+              <div class="owner-block"><h3>Owns</h3><ul><li>Refund workflow specification</li><li>Scenario and policy library</li><li>Deterministic evaluator</li><li>Pass, fail, and review logic</li><li>Run comparison and Markdown report</li></ul></div>
+              <div class="owner-block"><h3>Consumes</h3><ul><li><code>WorkflowSpec</code></li><li><code>Scenario</code></li><li>Recorded <code>RunEvent</code> fixture</li><li>Final synthetic state</li></ul></div>
+              <div class="owner-block"><h3>Produces</h3><ul><li><code>RunResult</code></li><li>Failed rule list and evidence links</li><li>Passing and failing run fixtures</li><li>Final Markdown report</li></ul></div>
+              <div class="owner-block"><h3>Independent completion</h3><ul><li>Evaluate saved event JSON</li><li>Cover valid, disputed, duplicate, and timeout cases</li><li>Prove deterministic failures cannot be overridden</li><li>Generate a report without Switch</li></ul></div>
+            </div>
+          </article>
+
+          <article class="owner">
+            <div class="owner-head"><div class="owner-name"><strong>Shivam</strong><span>Landing page and product presentation</span></div><span class="owner-path">apps/landing</span></div>
+            <div class="owner-body">
+              <div class="owner-block"><h3>Owns</h3><ul><li>Product positioning and landing page</li><li>Responsive layout and accessibility</li><li>Architecture and workflow visuals</li><li>Demo trace presentation</li><li>Metadata, social preview, and deployment</li></ul></div>
+              <div class="owner-block"><h3>Consumes</h3><ul><li>Approved PRD copy</li><li>Static passing and failing fixtures</li><li>Product architecture diagram</li><li>Final screenshots when available</li></ul></div>
+              <div class="owner-block"><h3>Produces</h3><ul><li>Shareable landing page</li><li>Problem, solution, and workflow sections</li><li>Product demo preview</li><li>Technical architecture section</li><li>Clear repository and demo calls to action</li></ul></div>
+              <div class="owner-block"><h3>Independent completion</h3><ul><li>Build with static JSON fixtures</li><li>Do not depend on runtime APIs</li><li>Use plausible product data</li><li>Verify desktop, mobile, keyboard, and metadata</li></ul></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="table-wrap matrix">
+          <table>
+            <thead><tr><th>Handoff</th><th>Producer</th><th>Consumer</th><th>Integration test</th></tr></thead>
+            <tbody>
+              <tr><td><span class="handoff">RunRequest</span></td><td>Ojas</td><td>Abhinav</td><td>A room command starts one simulation with the selected agent, workflow, and scenario.</td></tr>
+              <tr><td><span class="handoff">RunEvent + finalState</span></td><td>Abhinav</td><td>Maqsud</td><td>A disputed refund event log produces a deterministic failure.</td></tr>
+              <tr><td><span class="handoff">RunResult + report</span></td><td>Maqsud</td><td>Ojas</td><td>The Switch room receives the verdict, failed rule, trace summary, and approval request.</td></tr>
+              <tr><td><span class="handoff">Static product fixtures</span></td><td>Maqsud</td><td>Shivam</td><td>The landing page renders one failing run and one corrected rerun without a backend.</td></tr>
+              <tr><td><span class="handoff">Final screenshots and links</span></td><td>Ojas and Abhinav</td><td>Shivam</td><td>The landing page replaces mock visuals without layout changes.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="acceptance">
+        <div class="section-head">
+          <div class="section-number">08 / Acceptance criteria</div>
+          <h2>The MVP is complete when one unsafe action becomes a verified correction</h2>
+          <p class="section-summary">The complete demonstration must prove safety, evidence, team collaboration, reproducibility, and independent component integration.</p>
+        </div>
+
+        <div class="acceptance-grid">
+          <article class="acceptance"><strong>Connection</strong><p>Agent Drill and the e-commerce support agent work in one Switch room. The target uses only Drill MCP tools.</p></article>
+          <article class="acceptance"><strong>Simulation</strong><p>A disputed $750 payment loads into isolated state. The target agent can inspect it and attempt actions.</p></article>
+          <article class="acceptance"><strong>Failure evidence</strong><p>An unsafe refund produces fail with the exact tool call, failed rule, and final synthetic state.</p></article>
+          <article class="acceptance"><strong>Correction</strong><p>After the target-agent policy changes, the failed scenario returns manual review and passes.</p></article>
+          <article class="acceptance"><strong>Collaboration</strong><p>Support adds the case, finance defines the rule, engineering fixes the agent, and an approver records the release decision.</p></article>
+          <article class="acceptance"><strong>Reproduction</strong><p>A new developer can start the local stack and reproduce both outcomes from repository instructions.</p></article>
+          <article class="acceptance"><strong>Presentation</strong><p>The landing page explains the problem, simulation flow, evidence, and team value without requiring a live backend.</p></article>
+          <article class="acceptance"><strong>Safety</strong><p>No production credential, endpoint, customer record, or production state appears in the run.</p></article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div><strong>Agent Drill PRD</strong><p>Shareable product and implementation draft</p></div>
+        <div class="footer-links">
+          <a href="https://www.raindrop.ai/simulate/">Raindrop reference</a>
+          <a href="https://www.devtoolsacademy.com/hackathons/flip-the-switch">Hackathon</a>
+          <a href="https://x.com/heydamir">Design guidance: unslop</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const navLinks = Array.from(document.querySelectorAll(".nav a"));
+    const sections = navLinks.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        navLinks.forEach((link) => link.setAttribute("aria-current", String(link.getAttribute("href") === `#${visible.target.id}`)));
+      }, { rootMargin: "-20% 0px -65%", threshold: [0.1, 0.4, 0.8] });
+      sections.forEach((section) => observer.observe(section));
+    }
+  </script>
+</body>
+</html>

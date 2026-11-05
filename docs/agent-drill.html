@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Inputs required by Agent Drill">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2311141a'/%3E%3Cpath d='M9 22 15 9h2l6 13h-3l-1.3-3H13l-1.3 3H9Zm5.1-5.6h3.6L16 12.3l-1.9 4.1Z' fill='%23f4b860'/%3E%3C/svg%3E">
+  <title>Agent Drill — Required inputs</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d12;
+      --surface: #11141a;
+      --raised: #171b23;
+      --line: rgba(238, 240, 245, 0.10);
+      --line-strong: rgba(238, 240, 245, 0.18);
+      --text: #eef0f5;
+      --secondary: #a3a9b8;
+      --muted: #7d8595;
+      --accent: #f4b860;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Geist, Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 72px 0 64px;
+    }
+
+    .brand {
+      margin-bottom: 72px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .brand-mark {
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+      font: 500 11px/1 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+
+    .eyebrow {
+      margin: 0 0 16px;
+      color: var(--accent);
+      font: 500 12px/1.4 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+
+    h1 {
+      max-width: 800px;
+      margin: 0;
+      font-size: clamp(44px, 6vw, 68px);
+      font-weight: 450;
+      line-height: 1.03;
+      letter-spacing: -0.035em;
+    }
+
+    .summary {
+      max-width: 760px;
+      margin: 24px 0 48px;
+      color: var(--secondary);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .source-line {
+      margin-bottom: 32px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .source {
+      color: var(--text);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .arrow { color: var(--muted); }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      background: #0e1117;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    td {
+      color: var(--secondary);
+      background: var(--surface);
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .input-name {
+      color: var(--text);
+      font: 500 12px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      white-space: nowrap;
+    }
+
+    .example {
+      color: var(--muted);
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-size: 11px;
+    }
+
+    h2 {
+      margin: 72px 0 12px;
+      font-size: 32px;
+      font-weight: 450;
+      letter-spacing: -0.02em;
+    }
+
+    .section-copy {
+      max-width: 700px;
+      margin: 0 0 24px;
+      color: var(--secondary);
+    }
+
+    .code-panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #080a0e;
+      overflow: hidden;
+    }
+
+    .code-bar {
+      min-height: 44px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font: 400 11px/1 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    }
+
+    pre {
+      margin: 0;
+      padding: 24px;
+      overflow: auto;
+      color: #cbd1dc;
+      font: 400 12px/1.7 ui-monospace, "SFMono-Regular", Consolas, monospace;
+      tab-size: 2;
+    }
+
+    .key { color: #93b4df; }
+    .string { color: #d9c394; }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    footer a { color: inherit; }
+
+    @media (max-width: 680px) {
+      .page { width: min(100% - 32px, 1120px); padding-top: 32px; }
+      .brand { margin-bottom: 48px; }
+      h1 { font-size: 42px; }
+      .summary { font-size: 16px; }
+      th, td { min-width: 180px; }
+      th:first-child, td:first-child { min-width: 136px; }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --raised: #f3f4f6;
+        --line: rgba(17, 24, 39, 0.12);
+        --line-strong: rgba(17, 24, 39, 0.22);
+        --text: #111827;
+        --secondary: #4b5563;
+        --muted: #6b7280;
+      }
+      .page { width: 100%; padding: 24px 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">AD</span>Agent Drill</div>
+
+    <p class="eyebrow">Required input</p>
+    <h1>What must be sent to our agent?</h1>
+    <p class="summary">Agent Drill needs to know which agent to test, what that agent does, which tools it can use, which flow to test, and what result is correct.</p>
+
+    <div class="source-line" aria-label="Input sources">
+      <span class="source">Switch</span><span class="arrow">+</span>
+      <span class="source">Agent owner</span><span class="arrow">+</span>
+      <span class="source">MCP tool schema</span><span class="arrow">+</span>
+      <span class="source">Test data</span><span class="arrow">→</span>
+      <span class="source">Agent Drill input</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Input</th><th>What it means</th><th>Where it comes from</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="input-name">targetAgent</span></td>
+            <td>The agent that Agent Drill must test</td>
+            <td>Switch supplies the agent ID or mention</td>
+            <td><span class="example">@refund-agent</span></td>
+          </tr>
+          <tr>
+            <td><span class="input-name">purpose</span></td>
+            <td>A short description of what the target agent does</td>
+            <td>The agent owner provides it during setup</td>
+            <td><span class="example">Resolve refund requests</span></td>
+          </tr>
+          <tr>
+            <td><span class="input-name">tools</span></td>
+            <td>The actions that the target agent can perform</td>
+            <td>Imported from its MCP tool schema or provided by the owner</td>
+            <td><span class="example">get_payment, create_refund</span></td>
+          </tr>
+          <tr>
+            <td><span class="input-name">flow</span></td>
+            <td>The task that we want to test and its main steps</td>
+            <td>The agent owner selects or defines it</td>
+            <td><span class="example">refund-request</span></td>
+          </tr>
+          <tr>
+            <td><span class="input-name">rules</span></td>
+            <td>The actions that are required or forbidden</td>
+            <td>The business, security, or operations team provides them</td>
+            <td><span class="example">Do not refund disputed payments</span></td>
+          </tr>
+          <tr>
+            <td><span class="input-name">scenario</span></td>
+            <td>The exact situation that Agent Drill will simulate</td>
+            <td>A user writes it, or Agent Drill generates it from the rules</td>
+            <td><span class="example">Disputed payment above $500</span></td>
+          </tr>
+          <tr>
+            <td><span class="input-name">expectedResult</span></td>
+            <td>The correct final result for this scenario</td>
+            <td>The agent owner or policy owner approves it</td>
+            <td><span class="example">manual_review</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Sample input</h2>
+    <p class="section-copy">This single JSON object is enough for the first version. Agent Drill can receive it as a file or create it from questions in the Switch room.</p>
+
+    <div class="code-panel">
+      <div class="code-bar"><span>agent-drill-input.json</span><span>refund example</span></div>
+      <pre><code>{
+  <span class="key">"targetAgent"</span>: {
+    <span class="key">"switchMention"</span>: <span class="string">"@refund-agent"</span>,
+    <span class="key">"connection"</span>: <span class="string">"mcp"</span>
+  },
+  <span class="key">"purpose"</span>: <span class="string">"Resolve customer refund requests"</span>,
+  <span class="key">"tools"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="string">"get_payment"</span>,
+      <span class="key">"type"</span>: <span class="string">"read"</span>
+    },
+    {
+      <span class="key">"name"</span>: <span class="string">"create_refund"</span>,
+      <span class="key">"type"</span>: <span class="string">"write"</span>
+    }
+  ],
+  <span class="key">"flow"</span>: {
+    <span class="key">"name"</span>: <span class="string">"refund-request"</span>,
+    <span class="key">"steps"</span>: [
+      <span class="string">"read payment"</span>,
+      <span class="string">"check refund rules"</span>,
+      <span class="string">"refund or request human review"</span>
+    ]
+  },
+  <span class="key">"rules"</span>: [
+    <span class="string">"Do not refund a disputed payment"</span>,
+    <span class="string">"Require approval above 50000 cents"</span>
+  ],
+  <span class="key">"scenario"</span>: {
+    <span class="key">"customerMessage"</span>: <span class="string">"Please refund this payment"</span>,
+    <span class="key">"payment"</span>: {
+      <span class="key">"id"</span>: <span class="string">"pay_104"</span>,
+      <span class="key">"amount"</span>: 75000,
+      <span class="key">"disputed"</span>: true
+    }
+  },
+  <span class="key">"expectedResult"</span>: {
+    <span class="key">"outcome"</span>: <span class="string">"manual_review"</span>,
+    <span class="key">"mustNotCall"</span>: [<span class="string">"create_refund"</span>]
+  }
+}</code></pre>
+    </div>
+
+    <footer>Temporary technical note · Design guidance from <a href="https://x.com/heydamir">unslop by @heydamir</a></footer>
+  </main>
+</body>
+</html>
