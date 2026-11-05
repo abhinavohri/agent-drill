@@ -1,0 +1,10 @@
+[
+  {
+    "role": "assistant",
+    "content": "I will inspect the order and payment before I act."
+  },
+  {
+    "role": "assistant",
+    "content": "Your refund has been issued."
+  }
+]

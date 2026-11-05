@@ -1,0 +1,33 @@
+{
+  "traceId": "trace_fixture_disputed_payment",
+  "agentId": "refund-agent",
+  "agentVersion": "production-fixture-v1",
+  "startedAt": "2026-11-05T09:00:00Z",
+  "events": [
+    {
+      "type": "message",
+      "role": "customer",
+      "content": "Please refund this order."
+    },
+    {
+      "type": "tool_call",
+      "tool": "get_payment",
+      "arguments": {"paymentId": "payment_1"}
+    },
+    {
+      "type": "tool_result",
+      "tool": "get_payment",
+      "result": {"id": "payment_1", "amount": 75000, "currency": "USD", "status": "disputed"}
+    },
+    {
+      "type": "tool_call",
+      "tool": "create_refund",
+      "arguments": {"paymentId": "payment_1", "amount": 75000}
+    },
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": "Your refund has been issued."
+    }
+  ]
+}

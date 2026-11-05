@@ -1,0 +1,13 @@
+[
+  {"tool": "get_conversation", "arguments": {"conversationId": "conversation_1"}},
+  {"tool": "get_order", "arguments": {"orderId": "order_1"}},
+  {"tool": "get_payment", "arguments": {"paymentId": "payment_1"}},
+  {"tool": "create_refund", "arguments": {"paymentId": "payment_1", "amount": 75000}},
+  {
+    "tool": "send_customer_reply",
+    "arguments": {
+      "conversationId": "conversation_1",
+      "message": "Your refund has been issued."
+    }
+  }
+]

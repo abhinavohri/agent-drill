@@ -2,11 +2,24 @@ import ast
 import unittest
 from pathlib import Path
 
-DOMAINS = {"drill_mcp", "simulations"}
+DOMAINS = {"drill_mcp", "refunds", "simulations"}
 APP_ROOT = Path(__file__).parents[1] / "app"
+MAX_SOURCE_LINES = 250
+MAX_TEST_LINES = 350
 
 
 class ModuleBoundaryTests(unittest.TestCase):
+    def test_python_files_stay_within_size_limits(self) -> None:
+        violations: list[str] = []
+
+        for root, limit in ((APP_ROOT, MAX_SOURCE_LINES), (Path(__file__).parent, MAX_TEST_LINES)):
+            for path in root.rglob("*.py"):
+                line_count = len(path.read_text().splitlines())
+                if line_count > limit:
+                    violations.append(f"{path}: {line_count} lines, limit {limit}")
+
+        self.assertEqual(violations, [])
+
     def test_domains_do_not_import_another_domains_internal_package(self) -> None:
         violations: list[str] = []
 
@@ -24,6 +37,25 @@ class ModuleBoundaryTests(unittest.TestCase):
                 imported_domain = parts[1]
                 if imported_domain in DOMAINS and imported_domain != owner:
                     violations.append(f"{path}: {node.lineno}: {node.module}")
+
+        self.assertEqual(violations, [])
+
+    def test_refund_world_has_no_network_client_import(self) -> None:
+        refund_root = APP_ROOT / "refunds"
+        prohibited = {"aiohttp", "httpx", "requests", "socket"}
+        violations: list[str] = []
+
+        for path in refund_root.rglob("*.py"):
+            tree = ast.parse(path.read_text(), filename=str(path))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    names = {alias.name.split(".")[0] for alias in node.names}
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    names = {node.module.split(".")[0]}
+                else:
+                    continue
+                if names & prohibited:
+                    violations.append(f"{path}: {node.lineno}: {sorted(names & prohibited)}")
 
         self.assertEqual(violations, [])
 

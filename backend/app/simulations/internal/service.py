@@ -75,9 +75,41 @@ class SimulationService:
         record = self._get_active_record(run_id)
         record.append(RunEventType.TOOL_RESULT, {"tool": tool_name, "result": result})
 
+    def record_message(self, run_id: str, role: str, content: str) -> None:
+        record = self._get_active_record(run_id)
+        record.append(RunEventType.MESSAGE, {"role": role, "content": content})
+
+    def record_state_change(
+        self,
+        run_id: str,
+        tool_name: str,
+        change: dict[str, JsonValue],
+    ) -> None:
+        record = self._get_active_record(run_id)
+        record.append(RunEventType.STATE_CHANGED, {"tool": tool_name, "change": change})
+
     def record_tool_error(self, run_id: str, tool_name: str, message: str) -> None:
         record = self._get_active_record(run_id)
         record.append(RunEventType.TOOL_ERROR, {"tool": tool_name, "message": message})
+
+    async def complete_run(
+        self,
+        run_id: str,
+        final_state: dict[str, JsonValue],
+    ) -> SimulationRun:
+        record = self._get_active_record(run_id)
+        record.status = RunStatus.COMPLETED
+        record.final_state = final_state
+        record.append(RunEventType.RUN_COMPLETED, {})
+        await self._sandbox.cleanup(record.sandbox_id)
+        return record.snapshot()
+
+    async def fail_run(self, run_id: str, message: str) -> SimulationRun:
+        record = self._get_active_record(run_id)
+        record.status = RunStatus.FAILED
+        record.append(RunEventType.RUN_FAILED, {"message": message})
+        await self._sandbox.cleanup(record.sandbox_id)
+        return record.snapshot()
 
     async def stop_run(self, run_id: str) -> SimulationRun:
         record = self._get_active_record(run_id)

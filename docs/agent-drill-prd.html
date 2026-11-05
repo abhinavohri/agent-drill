@@ -340,6 +340,7 @@
               <li>Connect a target agent through Switch and MCP</li>
               <li>Run the target against stateful synthetic tools</li>
               <li>Record tool calls, results, and state changes</li>
+              <li>Ingest one redacted production trace format and convert it to a scenario</li>
               <li>Evaluate deterministic rules and open-ended output</li>
               <li>Support team review, approval, and reruns</li>
             </ul>
@@ -348,7 +349,7 @@
             <div class="list-head"><strong>Non-goals</strong><span>Deferred</span></div>
             <ul class="plain-list excluded">
               <li>Automatic copies of arbitrary production services</li>
-              <li>Production trace ingestion and CI integration</li>
+              <li>Multi-provider trace ingestion and CI integration</li>
               <li>Automatic workflow discovery</li>
               <li>Parallel execution and cost regression analysis</li>
               <li>A separate simulation dashboard</li>
@@ -448,6 +449,7 @@
                   <tr><td><span class="req-id">FR-07</span></td><td>Users can stop a run and rerun failed scenarios with clean state.</td><td><span class="priority">Must</span></td></tr>
                   <tr><td><span class="req-id">FR-08</span></td><td>Agent Drill creates a final Markdown report in the Switch room.</td><td><span class="priority">Must</span></td></tr>
                   <tr><td><span class="req-id">FR-09</span></td><td>Users can compare an original run with its rerun.</td><td><span class="priority">Should</span></td></tr>
+                  <tr><td><span class="req-id">FR-10</span></td><td>Users can ingest one redacted production trace format and convert it to a scenario.</td><td><span class="priority">Must</span></td></tr>
                 </tbody>
               </table>
             </div>
@@ -567,11 +569,11 @@
           </article>
 
           <article class="owner">
-            <div class="owner-head"><div class="owner-name"><strong>Maqsud</strong><span>Workflows, scenarios, evaluation, and reports</span></div><span class="owner-path">packages/evaluator · fixtures/refunds</span></div>
+            <div class="owner-head"><div class="owner-name"><strong>Maqsud</strong><span>Trace ingestion, scenarios, evaluation, and reports</span></div><span class="owner-path">packages/evaluator · fixtures/refunds</span></div>
             <div class="owner-body">
-              <div class="owner-block"><h3>Owns</h3><ul><li>Refund workflow specification</li><li>Scenario and policy library</li><li>Deterministic evaluator</li><li>Pass, fail, and review logic</li><li>Run comparison and Markdown report</li></ul></div>
-              <div class="owner-block"><h3>Consumes</h3><ul><li><code>WorkflowSpec</code></li><li><code>Scenario</code></li><li>Recorded <code>RunEvent</code> fixture</li><li>Final synthetic state</li></ul></div>
-              <div class="owner-block"><h3>Produces</h3><ul><li><code>RunResult</code></li><li>Failed rule list and evidence links</li><li>Passing and failing run fixtures</li><li>Final Markdown report</li></ul></div>
+              <div class="owner-block"><h3>Owns</h3><ul><li>Refund workflow specification</li><li>Production-trace ingestion and redaction</li><li>Scenario and policy library</li><li>Deterministic evaluator</li><li>Pass, fail, review, comparison, and report logic</li></ul></div>
+              <div class="owner-block"><h3>Consumes</h3><ul><li>Redacted production trace</li><li><code>WorkflowSpec</code> and <code>Scenario</code></li><li>Recorded <code>RunEvent</code> fixture</li><li>Final synthetic state</li></ul></div>
+              <div class="owner-block"><h3>Produces</h3><ul><li>Normalized trace and <code>Scenario</code></li><li><code>RunResult</code></li><li>Failed rule list and evidence links</li><li>Passing and failing run fixtures</li><li>Final Markdown report</li></ul></div>
               <div class="owner-block"><h3>Independent completion</h3><ul><li>Evaluate saved event JSON</li><li>Cover valid, disputed, duplicate, and timeout cases</li><li>Prove deterministic failures cannot be overridden</li><li>Generate a report without Switch</li></ul></div>
             </div>
           </article>
@@ -591,6 +593,7 @@
           <table>
             <thead><tr><th>Handoff</th><th>Producer</th><th>Consumer</th><th>Integration test</th></tr></thead>
             <tbody>
+              <tr><td><span class="handoff">Redacted production trace</span></td><td>Agent owner</td><td>Maqsud</td><td>One supported trace converts to a reviewed <code>Scenario</code> without secrets or customer data.</td></tr>
               <tr><td><span class="handoff">RunRequest</span></td><td>Ojas</td><td>Abhinav</td><td>A room command starts one simulation with the selected agent, workflow, and scenario.</td></tr>
               <tr><td><span class="handoff">RunEvent + finalState</span></td><td>Abhinav</td><td>Maqsud</td><td>A disputed refund event log produces a deterministic failure.</td></tr>
               <tr><td><span class="handoff">RunResult + report</span></td><td>Maqsud</td><td>Ojas</td><td>The Switch room receives the verdict, failed rule, trace summary, and approval request.</td></tr>
@@ -615,6 +618,7 @@
           <article class="acceptance"><strong>Correction</strong><p>After the target-agent policy changes, the failed scenario returns manual review and passes.</p></article>
           <article class="acceptance"><strong>Collaboration</strong><p>Support adds the case, finance defines the rule, engineering fixes the agent, and an approver records the release decision.</p></article>
           <article class="acceptance"><strong>Reproduction</strong><p>A new developer can start the local stack and reproduce both outcomes from repository instructions.</p></article>
+          <article class="acceptance"><strong>Trace ingestion</strong><p>A redacted production trace converts to a reviewed scenario without production secrets or customer data.</p></article>
           <article class="acceptance"><strong>Presentation</strong><p>The landing page explains the problem, simulation flow, evidence, and team value without requiring a live backend.</p></article>
           <article class="acceptance"><strong>Safety</strong><p>No production credential, endpoint, customer record, or production state appears in the run.</p></article>
         </div>

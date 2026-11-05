@@ -7,12 +7,19 @@ from app.drill_mcp.facade import (
     ToolNotAllowedError,
     UpstreamToolTimeoutError,
 )
-from app.simulations.facade import MockSandbox, RunEventType, SimulationService
+from app.simulations.facade import (
+    ActionLimitExceededError,
+    MockSandbox,
+    RunEventType,
+    RunStatus,
+    SimulationService,
+)
 
 
 class DrillProxyServiceTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
-        self.simulations = SimulationService(MockSandbox())
+        self.sandbox = MockSandbox()
+        self.simulations = SimulationService(self.sandbox)
         self.run = await self.simulations.start_run("proxy-test")
         self.upstream = MockUpstreamToolClient()
         self.proxy = DrillProxyService(self.upstream, self.simulations)
@@ -62,4 +69,15 @@ class DrillProxyServiceTests(unittest.IsolatedAsyncioTestCase):
             RunEventType.TOOL_ERROR,
         )
         await proxy.close()
+
+    async def test_action_limit_fails_run_and_cleans_sandbox(self) -> None:
+        limited = await self.simulations.start_run("limited", max_actions=1)
+        await self.proxy.call_tool(limited.id, "get_payment", {"paymentId": "pay_1"})
+
+        with self.assertRaises(ActionLimitExceededError):
+            await self.proxy.call_tool(limited.id, "get_payment", {"paymentId": "pay_2"})
+
+        failed = self.simulations.get_run(limited.id)
+        self.assertEqual(failed.status, RunStatus.FAILED)
+        self.assertNotIn(limited.sandbox_id, self.sandbox.active_ids)
 
