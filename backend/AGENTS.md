@@ -22,8 +22,8 @@ These rules apply to all files in `backend/`.
 Run these commands from `backend/`:
 
 ```sh
-.venv/bin/ruff check app tests
-.venv/bin/python -m unittest discover -s tests -p 'test_*.py'
+uv run ruff check app tests
+uv run python -m unittest discover -s tests -p 'test_*.py'
 ```
 
 Import `app.main` and each `app.jobs.*` entry point after a structural change.
