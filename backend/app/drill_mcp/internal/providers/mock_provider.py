@@ -1,17 +1,24 @@
-"""Mock upstream MCP provider for local backend development."""
+"""Mock tool provider for focused Drill proxy tests."""
 
 import asyncio
+from dataclasses import dataclass
 
 from pydantic import JsonValue
 
 from app.drill_mcp.internal.models import ToolDefinition, ToolResult
 
 
-class MockUpstreamToolClient:
+@dataclass(frozen=True)
+class RecordedToolCall:
+    tool_name: str
+    arguments: dict[str, JsonValue]
+
+
+class MockToolProvider:
     def __init__(self, delay_seconds: float = 0) -> None:
         self._delay_seconds = delay_seconds
         self.closed = False
-        self.calls: list[tuple[str, dict[str, JsonValue]]] = []
+        self.calls: list[RecordedToolCall] = []
         self._tools = (
             ToolDefinition(
                 name="get_payment",
@@ -49,11 +56,10 @@ class MockUpstreamToolClient:
         if self._delay_seconds:
             await asyncio.sleep(self._delay_seconds)
         if tool_name not in {tool.name for tool in self._tools}:
-            raise LookupError(f"Unknown upstream tool: {tool_name}")
+            raise LookupError(f"Unknown mock tool: {tool_name}")
 
-        self.calls.append((tool_name, arguments))
+        self.calls.append(RecordedToolCall(tool_name, arguments))
         return ToolResult(data={"provider": "mock", "tool": tool_name, "arguments": arguments})
 
     async def close(self) -> None:
         self.closed = True
-

@@ -1,12 +1,13 @@
 """Validated refund scenario data and synthetic state."""
 
+from dataclasses import dataclass
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 
 class RefundModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
 
 class Message(RefundModel):
@@ -77,16 +78,50 @@ class RefundScenario(RefundModel):
     faults: list[ToolFault] = Field(default_factory=list)
 
 
+class ConversationArguments(RefundModel):
+    conversation_id: str = Field(alias="conversationId")
+
+
+class OrderArguments(RefundModel):
+    order_id: str = Field(alias="orderId")
+
+
+class PaymentArguments(RefundModel):
+    payment_id: str = Field(alias="paymentId")
+
+
+class CreateRefundArguments(PaymentArguments):
+    amount: int = Field(gt=0)
+
+
+class SendCustomerReplyArguments(ConversationArguments):
+    message: str = Field(min_length=1)
+
+
+class EscalateToHumanArguments(ConversationArguments):
+    reason: str = Field(min_length=1)
+
+
+class DeliveryStatusResult(RefundModel):
+    order_id: str = Field(alias="orderId")
+    status: str
+
+
+class RefundHistoryResult(RefundModel):
+    payment_id: str = Field(alias="paymentId")
+    refunds: list[Refund]
+
+
+@dataclass
+class PendingFault:
+    kind: Literal["error", "timeout"]
+    remaining: int
+    message: str
+
+
 class RefundToolSpec(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     name: str
     description: str
     input_schema: dict[str, JsonValue]
-
-
-class WorldToolResult(BaseModel):
-    model_config = ConfigDict(frozen=True)
-
-    data: dict[str, JsonValue]
-    state_change: dict[str, JsonValue] | None = None

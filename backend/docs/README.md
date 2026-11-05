@@ -4,7 +4,7 @@ Use this page as the backend documentation index.
 
 - [Architecture](architecture.md) defines packages and dependency direction.
 - [Domain packages](domains.md) defines ownership and public interfaces.
-- [External providers](providers.md) defines upstream MCP and sandbox boundaries.
+- [External providers](providers.md) defines tool-provider and sandbox boundaries.
 - [Data models](data-models.md) defines model ownership.
 - [Quality checks](quality-checks.md) defines required checks.
 

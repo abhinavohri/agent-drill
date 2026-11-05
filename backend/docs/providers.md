@@ -1,8 +1,8 @@
 # External providers
 
-## Upstream MCP provider
+## Tool provider
 
-The upstream MCP provider owns tool discovery and execution for the Drill MCP server. Local runs use the stateful refund world. The explicit mock remains available for focused proxy tests.
+The tool provider owns tool discovery and execution for the Drill MCP server. Local runs use the refund provider and stateful refund world. The explicit mock remains available for focused proxy tests.
 
 A real provider must return validated tool definitions and typed tool results. It must own transport errors and connection cleanup.
 

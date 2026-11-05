@@ -3,9 +3,9 @@ import unittest
 from app.drill_mcp.facade import (
     DrillProxyService,
     InvalidToolArgumentsError,
-    MockUpstreamToolClient,
+    MockToolProvider,
     ToolNotAllowedError,
-    UpstreamToolTimeoutError,
+    ToolProviderTimeoutError,
 )
 from app.simulations.facade import (
     ActionLimitExceededError,
@@ -21,14 +21,14 @@ class DrillProxyServiceTests(unittest.IsolatedAsyncioTestCase):
         self.sandbox = MockSandbox()
         self.simulations = SimulationService(self.sandbox)
         self.run = await self.simulations.start_run("proxy-test")
-        self.upstream = MockUpstreamToolClient()
-        self.proxy = DrillProxyService(self.upstream, self.simulations)
+        self.provider = MockToolProvider()
+        self.proxy = DrillProxyService(self.provider, self.simulations)
         await self.proxy.initialize()
 
     async def asyncTearDown(self) -> None:
         await self.proxy.close()
 
-    async def test_imports_and_forwards_upstream_tool(self) -> None:
+    async def test_imports_and_forwards_provider_tool(self) -> None:
         result = await self.proxy.call_tool(
             self.run.id,
             "get_payment",
@@ -36,32 +36,33 @@ class DrillProxyServiceTests(unittest.IsolatedAsyncioTestCase):
         )
 
         self.assertEqual(result.data["provider"], "mock")
-        self.assertEqual(self.upstream.calls, [("get_payment", {"paymentId": "pay_1"})])
+        self.assertEqual(self.provider.calls[0].tool_name, "get_payment")
+        self.assertEqual(self.provider.calls[0].arguments, {"paymentId": "pay_1"})
         events = self.simulations.get_run(self.run.id).events
         self.assertEqual(events[-2].type, RunEventType.TOOL_CALL)
         self.assertEqual(events[-1].type, RunEventType.TOOL_RESULT)
 
-    async def test_rejects_unknown_tool_before_upstream_call(self) -> None:
+    async def test_rejects_unknown_tool_before_provider_call(self) -> None:
         with self.assertRaises(ToolNotAllowedError):
             await self.proxy.call_tool(self.run.id, "delete_account", {})
 
-        self.assertEqual(self.upstream.calls, [])
+        self.assertEqual(self.provider.calls, [])
 
     async def test_rejects_invalid_arguments(self) -> None:
         with self.assertRaises(InvalidToolArgumentsError):
             await self.proxy.call_tool(self.run.id, "get_payment", {})
 
-        self.assertEqual(self.upstream.calls, [])
+        self.assertEqual(self.provider.calls, [])
 
-    async def test_records_upstream_timeout(self) -> None:
+    async def test_records_provider_timeout(self) -> None:
         proxy = DrillProxyService(
-            MockUpstreamToolClient(delay_seconds=0.05),
+            MockToolProvider(delay_seconds=0.05),
             self.simulations,
             timeout_seconds=0.001,
         )
         await proxy.initialize()
 
-        with self.assertRaises(UpstreamToolTimeoutError):
+        with self.assertRaises(ToolProviderTimeoutError):
             await proxy.call_tool(self.run.id, "get_payment", {"paymentId": "pay_1"})
 
         self.assertEqual(

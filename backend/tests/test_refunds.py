@@ -2,8 +2,15 @@ import json
 import unittest
 from pathlib import Path
 
-from app.drill_mcp.facade import DrillProxyService, RefundWorldToolClient
-from app.refunds.facade import RefundScenario, RefundWorld, load_refund_scenario
+from pydantic import ValidationError
+
+from app.drill_mcp.facade import DrillProxyService
+from app.refunds.facade import (
+    RefundScenario,
+    RefundToolProvider,
+    RefundWorld,
+    load_refund_scenario,
+)
 from app.simulations.facade import MockSandbox, RunEventType, RunStatus, SimulationService
 
 FIXTURE_ROOT = Path(__file__).parents[1] / "fixtures" / "stubs"
@@ -13,10 +20,11 @@ class RefundWorldTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.scenario = load_refund_scenario(FIXTURE_ROOT / "refund-scenario.json")
         self.world = RefundWorld(self.scenario)
+        self.provider = RefundToolProvider(self.world)
 
     async def test_exposes_all_refund_tools(self) -> None:
         self.assertEqual(
-            {tool.name for tool in self.world.list_tools()},
+            {tool.name for tool in await self.provider.list_tools()},
             {
                 "get_conversation",
                 "get_order",
@@ -30,18 +38,18 @@ class RefundWorldTests(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_mutates_and_returns_refund_state(self) -> None:
-        payment = await self.world.call_tool("get_payment", {"paymentId": "payment_1"})
+        payment = await self.provider.call_tool("get_payment", {"paymentId": "payment_1"})
         self.assertEqual(payment.data["status"], "disputed")
 
-        created = await self.world.call_tool(
+        created = await self.provider.call_tool(
             "create_refund",
             {"paymentId": "payment_1", "amount": 75000},
         )
-        await self.world.call_tool(
+        await self.provider.call_tool(
             "send_customer_reply",
             {"conversationId": "conversation_1", "message": "Refund issued."},
         )
-        await self.world.call_tool(
+        await self.provider.call_tool(
             "escalate_to_human",
             {"conversationId": "conversation_1", "reason": "Disputed payment."},
         )
@@ -53,7 +61,7 @@ class RefundWorldTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(state["human_escalations"]), 1)
 
     async def test_unsafe_refund_matches_evaluator_handoff_fixture(self) -> None:
-        await self.world.call_tool(
+        await self.provider.call_tool(
             "create_refund",
             {"paymentId": "payment_1", "amount": 75000},
         )
@@ -62,7 +70,7 @@ class RefundWorldTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.world.snapshot(), expected)
 
     async def test_new_world_starts_from_clean_fixture_state(self) -> None:
-        await self.world.call_tool(
+        await self.provider.call_tool(
             "create_refund",
             {"paymentId": "payment_1", "amount": 75000},
         )
@@ -82,18 +90,23 @@ class RefundWorldTests(unittest.IsolatedAsyncioTestCase):
             }
         ]
         world = RefundWorld(RefundScenario.model_validate(data))
+        provider = RefundToolProvider(world)
 
         with self.assertRaises(TimeoutError):
-            await world.call_tool("get_payment", {"paymentId": "payment_1"})
+            await provider.call_tool("get_payment", {"paymentId": "payment_1"})
 
-        result = await world.call_tool("get_payment", {"paymentId": "payment_1"})
+        result = await provider.call_tool("get_payment", {"paymentId": "payment_1"})
         self.assertEqual(result.data["id"], "payment_1")
+
+    async def test_rejects_null_tool_argument_at_feature_boundary(self) -> None:
+        with self.assertRaises(ValidationError):
+            await self.provider.call_tool("get_payment", {"paymentId": None})
 
     async def test_proxy_records_state_change_and_final_state(self) -> None:
         sandbox = MockSandbox()
         simulations = SimulationService(sandbox)
         run = await simulations.start_run(self.scenario.id)
-        proxy = DrillProxyService(RefundWorldToolClient(self.world), simulations)
+        proxy = DrillProxyService(self.provider, simulations)
         await proxy.initialize()
 
         await proxy.call_tool(

@@ -1,8 +1,17 @@
 """Assemble the Agent Drill HTTP application."""
 
+from typing import Literal
+
 from fastapi import FastAPI
+from pydantic import BaseModel, ConfigDict
 
 from app.simulations.facade import MockSandbox, SimulationService, build_router
+
+
+class HealthResponse(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    status: Literal["ok"] = "ok"
 
 
 def create_app() -> FastAPI:
@@ -10,9 +19,9 @@ def create_app() -> FastAPI:
     simulations = SimulationService(MockSandbox())
     app.include_router(build_router(simulations))
 
-    @app.get("/health")
-    async def health() -> dict[str, str]:
-        return {"status": "ok"}
+    @app.get("/health", response_model=HealthResponse)
+    async def health() -> HealthResponse:
+        return HealthResponse()
 
     return app
 
