@@ -3,8 +3,8 @@
 import asyncio
 from pathlib import Path
 
-from app.drill_mcp.facade import DrillProxyService, RefundWorldToolClient, run_stdio_server
-from app.refunds.facade import RefundWorld, load_refund_scenario
+from app.drill_mcp.facade import DrillProxyService, run_stdio_server
+from app.refunds.facade import RefundToolProvider, RefundWorld, load_refund_scenario
 from app.simulations.facade import MockSandbox, SimulationService
 
 FIXTURE_ROOT = Path(__file__).resolve().parents[2] / "fixtures" / "stubs"
@@ -15,7 +15,7 @@ async def main() -> None:
     world = RefundWorld(scenario)
     simulations = SimulationService(MockSandbox())
     run = await simulations.start_run(scenario.id)
-    proxy = DrillProxyService(RefundWorldToolClient(world), simulations)
+    proxy = DrillProxyService(RefundToolProvider(world), simulations)
     await proxy.initialize()
 
     try:

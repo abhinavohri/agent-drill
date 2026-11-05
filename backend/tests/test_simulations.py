@@ -1,8 +1,14 @@
+import json
 import unittest
+from datetime import UTC, datetime
+from pathlib import Path
+
+from pydantic import ValidationError
 
 from app.simulations.facade import (
     ActionLimitExceededError,
     MockSandbox,
+    RunEvent,
     RunEventType,
     RunStatus,
     SimulationService,
@@ -52,4 +58,22 @@ class SimulationServiceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(completed.events[-2].type, RunEventType.MESSAGE)
         self.assertEqual(completed.events[-1].type, RunEventType.RUN_COMPLETED)
         self.assertNotIn(run.sandbox_id, self.sandbox.active_ids)
+
+    def test_rejects_event_type_and_payload_mismatch(self) -> None:
+        with self.assertRaises(ValidationError):
+            RunEvent.model_validate(
+                {
+                    "sequence": 1,
+                    "type": "run_started",
+                    "payload": {"message": "wrong payload"},
+                    "created_at": datetime.now(UTC),
+                }
+            )
+
+    def test_handoff_event_fixture_matches_typed_contract(self) -> None:
+        path = Path(__file__).parents[1] / "fixtures" / "stubs" / "run-events.json"
+
+        events = [RunEvent.model_validate(value) for value in json.loads(path.read_text())]
+
+        self.assertEqual(len(events), 6)
 

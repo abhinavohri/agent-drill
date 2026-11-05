@@ -1,2 +1,2 @@
-"""Upstream MCP provider implementations."""
+"""Tool-provider contracts and test implementations."""
 

@@ -1,6 +1,8 @@
-"""Stable contracts for upstream MCP tools and results."""
+"""Stable contracts for generic tool providers and results."""
 
 from pydantic import BaseModel, ConfigDict, JsonValue
+
+from app.simulations.facade import StateChange
 
 
 class ToolDefinition(BaseModel):
@@ -16,5 +18,5 @@ class ToolResult(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     data: dict[str, JsonValue]
-    state_change: dict[str, JsonValue] | None = None
+    state_change: StateChange | None = None
 

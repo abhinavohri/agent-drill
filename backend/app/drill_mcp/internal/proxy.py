@@ -7,7 +7,7 @@ from jsonschema.exceptions import SchemaError, ValidationError
 from pydantic import JsonValue
 
 from app.drill_mcp.internal.models import ToolDefinition, ToolResult
-from app.drill_mcp.internal.providers.upstream import UpstreamToolClient
+from app.drill_mcp.internal.providers.provider import ToolProvider
 from app.simulations.facade import ActionLimitExceededError, SimulationService
 
 
@@ -19,31 +19,31 @@ class InvalidToolArgumentsError(ValueError):
     pass
 
 
-class UpstreamToolTimeoutError(TimeoutError):
+class ToolProviderTimeoutError(TimeoutError):
     pass
 
 
-class UpstreamToolError(RuntimeError):
+class ToolProviderError(RuntimeError):
     pass
 
 
 class DrillProxyService:
     def __init__(
         self,
-        upstream: UpstreamToolClient,
+        provider: ToolProvider,
         simulations: SimulationService,
         *,
         allowed_tools: set[str] | None = None,
         timeout_seconds: float = 30,
     ) -> None:
-        self._upstream = upstream
+        self._provider = provider
         self._simulations = simulations
         self._allowed_tools = allowed_tools
         self._timeout_seconds = timeout_seconds
         self._tools: dict[str, ToolDefinition] = {}
 
     async def initialize(self) -> None:
-        tools = await self._upstream.list_tools()
+        tools = await self._provider.list_tools()
         self._tools = {tool.name: tool for tool in tools}
 
     def list_tools(self) -> tuple[ToolDefinition, ...]:
@@ -65,15 +65,15 @@ class DrillProxyService:
 
         try:
             async with asyncio.timeout(self._timeout_seconds):
-                result = await self._upstream.call_tool(tool_name, arguments)
+                result = await self._provider.call_tool(tool_name, arguments)
         except TimeoutError as exc:
             message = f"Tool {tool_name} exceeded the {self._timeout_seconds:g} second timeout"
             self._simulations.record_tool_error(run_id, tool_name, message)
-            raise UpstreamToolTimeoutError(message) from exc
+            raise ToolProviderTimeoutError(message) from exc
         except Exception as exc:
-            message = f"Upstream tool {tool_name} failed: {exc}"
+            message = f"Tool provider failed for {tool_name}: {exc}"
             self._simulations.record_tool_error(run_id, tool_name, message)
-            raise UpstreamToolError(message) from exc
+            raise ToolProviderError(message) from exc
 
         self._simulations.record_tool_result(run_id, tool_name, result.data)
         if result.state_change is not None:
@@ -81,12 +81,12 @@ class DrillProxyService:
         return result
 
     async def close(self) -> None:
-        await self._upstream.close()
+        await self._provider.close()
 
     def _get_allowed_tool(self, tool_name: str) -> ToolDefinition:
         tool = self._tools.get(tool_name)
         if tool is None:
-            raise ToolNotAllowedError(f"Tool {tool_name} is not exposed by the upstream server")
+            raise ToolNotAllowedError(f"Tool {tool_name} is not exposed by the provider")
         if self._allowed_tools is not None and tool_name not in self._allowed_tools:
             raise ToolNotAllowedError(f"Tool {tool_name} is not allowed for this run")
         return tool

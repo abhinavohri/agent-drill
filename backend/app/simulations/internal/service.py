@@ -4,6 +4,17 @@ from uuid import uuid4
 
 from pydantic import JsonValue
 
+from app.simulations.internal.events import (
+    EmptyPayload,
+    MessagePayload,
+    RunFailedPayload,
+    RunStartedPayload,
+    StateChange,
+    StateChangedPayload,
+    ToolCallPayload,
+    ToolErrorPayload,
+    ToolResultPayload,
+)
 from app.simulations.internal.models import (
     RunEventType,
     RunRecord,
@@ -43,7 +54,7 @@ class SimulationService:
             status=RunStatus.RUNNING,
             max_actions=max_actions,
         )
-        record.append(RunEventType.RUN_STARTED, {"scenarioId": scenario_id})
+        record.append(RunEventType.RUN_STARTED, RunStartedPayload(scenario_id=scenario_id))
         self._runs[run_id] = record
         return record.snapshot()
 
@@ -63,7 +74,7 @@ class SimulationService:
         record.action_count += 1
         record.append(
             RunEventType.TOOL_CALL,
-            {"tool": tool_name, "arguments": arguments},
+            ToolCallPayload(tool=tool_name, arguments=arguments),
         )
 
     def record_tool_result(
@@ -73,24 +84,27 @@ class SimulationService:
         result: dict[str, JsonValue],
     ) -> None:
         record = self._get_active_record(run_id)
-        record.append(RunEventType.TOOL_RESULT, {"tool": tool_name, "result": result})
+        record.append(RunEventType.TOOL_RESULT, ToolResultPayload(tool=tool_name, result=result))
 
     def record_message(self, run_id: str, role: str, content: str) -> None:
         record = self._get_active_record(run_id)
-        record.append(RunEventType.MESSAGE, {"role": role, "content": content})
+        record.append(RunEventType.MESSAGE, MessagePayload(role=role, content=content))
 
     def record_state_change(
         self,
         run_id: str,
         tool_name: str,
-        change: dict[str, JsonValue],
+        change: StateChange,
     ) -> None:
         record = self._get_active_record(run_id)
-        record.append(RunEventType.STATE_CHANGED, {"tool": tool_name, "change": change})
+        record.append(
+            RunEventType.STATE_CHANGED,
+            StateChangedPayload(tool=tool_name, change=change),
+        )
 
     def record_tool_error(self, run_id: str, tool_name: str, message: str) -> None:
         record = self._get_active_record(run_id)
-        record.append(RunEventType.TOOL_ERROR, {"tool": tool_name, "message": message})
+        record.append(RunEventType.TOOL_ERROR, ToolErrorPayload(tool=tool_name, message=message))
 
     async def complete_run(
         self,
@@ -98,23 +112,22 @@ class SimulationService:
         final_state: dict[str, JsonValue],
     ) -> SimulationRun:
         record = self._get_active_record(run_id)
-        record.status = RunStatus.COMPLETED
-        record.final_state = final_state
-        record.append(RunEventType.RUN_COMPLETED, {})
+        record.complete(final_state)
+        record.append(RunEventType.RUN_COMPLETED, EmptyPayload())
         await self._sandbox.cleanup(record.sandbox_id)
         return record.snapshot()
 
     async def fail_run(self, run_id: str, message: str) -> SimulationRun:
         record = self._get_active_record(run_id)
-        record.status = RunStatus.FAILED
-        record.append(RunEventType.RUN_FAILED, {"message": message})
+        record.fail(message)
+        record.append(RunEventType.RUN_FAILED, RunFailedPayload(message=message))
         await self._sandbox.cleanup(record.sandbox_id)
         return record.snapshot()
 
     async def stop_run(self, run_id: str) -> SimulationRun:
         record = self._get_active_record(run_id)
-        record.status = RunStatus.STOPPED
-        record.append(RunEventType.RUN_STOPPED, {})
+        record.stop()
+        record.append(RunEventType.RUN_STOPPED, EmptyPayload())
         await self._sandbox.cleanup(record.sandbox_id)
         return record.snapshot()
 
