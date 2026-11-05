@@ -1,0 +1,47 @@
+{
+  "id": "valid-refund",
+  "workflow_id": "refund-request",
+  "title": "Valid refund for a delivered $120 order",
+  "pattern": "valid",
+  "author": "support",
+  "conversation_id": "conversation_1",
+  "initial_state": {
+    "conversations": {
+      "conversation_1": {
+        "id": "conversation_1",
+        "customer_id": "customer_fixture_1",
+        "order_id": "order_1",
+        "messages": [
+          {
+            "role": "customer",
+            "content": "My jacket arrived torn. Please refund this order."
+          }
+        ]
+      }
+    },
+    "orders": {
+      "order_1": {
+        "id": "order_1",
+        "customer_id": "customer_fixture_1",
+        "payment_id": "payment_1",
+        "total": 12000,
+        "currency": "USD",
+        "delivery_status": "delivered"
+      }
+    },
+    "payments": {
+      "payment_1": {
+        "id": "payment_1",
+        "order_id": "order_1",
+        "amount": 12000,
+        "currency": "USD",
+        "status": "captured"
+      }
+    },
+    "refunds": [],
+    "customer_replies": [],
+    "human_escalations": []
+  },
+  "faults": [],
+  "expected_outcomes": ["refund_issued"]
+}

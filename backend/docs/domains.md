@@ -16,7 +16,21 @@ Its facade exports the simulation service, stable run models, sandbox contract, 
 
 `app/refunds/` owns the eight refund tool contracts, validated scenario state, fault injection, and stateful tool behavior.
 
-Its facade exports the refund tool provider, refund world, and temporary scenario fixture loader. Replace the loader when the shared `Scenario` contract is available.
+Its facade exports the refund tool provider, refund world, scenario state and tool-argument models, the tool-to-argument map, and the temporary scenario fixture loader. Replace the loader with the `workflows` library when the team approves the shared `Scenario` contract.
+
+## Workflows
+
+`app/workflows/` owns workflow specifications, the scenario and policy library, and the scripted target-agent runs in `fixtures/refunds/`. Its parser validates each library file and the references between files.
+
+Its facade exports `WorkflowSpec`, `Scenario`, `AgentScript`, the policy and review rule types, and the library loader.
+
+## Evaluations
+
+`app/evaluations/` owns deterministic run evaluation, pass, fail, and review verdicts, run comparison, and Markdown reports. It reads recorded runs. It does not call tools, network services, or language models.
+
+Its facade exports `evaluate_run`, `compare_results`, the report renderers, and the `RecordedRun`, `ReviewInput`, `RunResult`, and `RunComparison` contracts.
+
+Hard checks (input schema, tool permissions, action order and invariants, and final state) use only the recorded run. Reviewer decisions and language-model judge assessments resolve only the semantic-output and human-approval checks, so they cannot override a hard failure.
 
 ## Process entry points
 

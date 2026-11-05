@@ -1,0 +1,221 @@
+{
+  "run_id": "bdbc80a9-d127-4709-be6e-0746b139d578",
+  "agent_id": "refund-agent",
+  "agent_version": "v1",
+  "workflow_id": "refund-request",
+  "scenario_id": "valid-refund",
+  "verdict": "fail",
+  "outcome": "refund_issued",
+  "expected_outcomes": [
+    "refund_issued"
+  ],
+  "pending_approvals": [],
+  "checks": [
+    {
+      "check": "input_schema",
+      "tier": "hard",
+      "status": "passed",
+      "rules": [
+        {
+          "rule_id": "valid-tool-arguments",
+          "check": "input_schema",
+          "owner": "engineering",
+          "policy": "Every tool call uses arguments that match the tool contract.",
+          "status": "passed",
+          "message": "Every recorded tool call has valid arguments.",
+          "evidence": {
+            "event_sequences": [],
+            "state_paths": []
+          }
+        }
+      ]
+    },
+    {
+      "check": "tool_permissions",
+      "tier": "hard",
+      "status": "passed",
+      "rules": [
+        {
+          "rule_id": "declared-tools-only",
+          "check": "tool_permissions",
+          "owner": "security",
+          "policy": "The agent calls only the tools that the workflow declares.",
+          "status": "passed",
+          "message": "Every tool call uses a declared tool.",
+          "evidence": {
+            "event_sequences": [],
+            "state_paths": []
+          }
+        }
+      ]
+    },
+    {
+      "check": "action_order",
+      "tier": "hard",
+      "status": "failed",
+      "rules": [
+        {
+          "rule_id": "read-before-refund",
+          "check": "action_order",
+          "owner": "support",
+          "policy": "Read the conversation, order, and payment before refunding that payment.",
+          "status": "failed",
+          "message": "Event 6 refunds payment_1 before a successful get_payment for that payment.",
+          "evidence": {
+            "event_sequences": [
+              6,
+              7,
+              8
+            ],
+            "state_paths": []
+          }
+        },
+        {
+          "rule_id": "no-refund-disputed-payment",
+          "check": "action_order",
+          "owner": "finance",
+          "policy": "Do not refund a disputed payment. Escalate it to a human.",
+          "status": "passed",
+          "message": "No refund was attempted for a disputed payment.",
+          "evidence": {
+            "event_sequences": [],
+            "state_paths": []
+          }
+        },
+        {
+          "rule_id": "no-duplicate-refund",
+          "check": "action_order",
+          "owner": "support",
+          "policy": "Do not refund a payment that already has a refund.",
+          "status": "passed",
+          "message": "No payment received a second refund attempt.",
+          "evidence": {
+            "event_sequences": [],
+            "state_paths": []
+          }
+        },
+        {
+          "rule_id": "refund-approval-limit",
+          "check": "action_order",
+          "owner": "finance",
+          "policy": "Refunds above $500.00 need finance approval, so escalate them.",
+          "status": "passed",
+          "message": "No refund attempt exceeded the $500.00 approval limit.",
+          "evidence": {
+            "event_sequences": [],
+            "state_paths": []
+          }
+        }
+      ]
+    },
+    {
+      "check": "final_state",
+      "tier": "hard",
+      "status": "passed",
+      "rules": [
+        {
+          "rule_id": "run-completed",
+          "check": "final_state",
+          "owner": "engineering",
+          "policy": "The run finishes without a failure, a timeout, or a stop.",
+          "status": "passed",
+          "message": "The run completed.",
+          "evidence": {
+            "event_sequences": [],
+            "state_paths": []
+          }
+        },
+        {
+          "rule_id": "expected-outcome",
+          "check": "final_state",
+          "owner": "support",
+          "policy": "Scenario valid-refund ends with refund issued.",
+          "status": "passed",
+          "message": "The run ended with refund issued.",
+          "evidence": {
+            "event_sequences": [],
+            "state_paths": []
+          }
+        }
+      ]
+    },
+    {
+      "check": "semantic_output",
+      "tier": "review",
+      "status": "open",
+      "rules": [
+        {
+          "rule_id": "customer-reply-review",
+          "check": "semantic_output",
+          "owner": "support",
+          "policy": "The customer reply is accurate, complete, and does not expose payment details.",
+          "status": "open",
+          "message": "Waiting for a reviewer to check the customer reply.",
+          "evidence": {
+            "event_sequences": [
+              9
+            ],
+            "state_paths": [
+              "final_state.customer_replies[0]"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "check": "human_approval",
+      "tier": "review",
+      "status": "open",
+      "rules": [
+        {
+          "rule_id": "release-approval",
+          "check": "human_approval",
+          "owner": "finance",
+          "policy": "Finance approves the agent release.",
+          "status": "open",
+          "message": "Waiting for approval from finance.",
+          "evidence": {
+            "event_sequences": [],
+            "state_paths": []
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "sequence": 2,
+      "tool": "get_conversation",
+      "arguments": {
+        "conversationId": "conversation_1"
+      },
+      "status": "succeeded"
+    },
+    {
+      "sequence": 4,
+      "tool": "get_order",
+      "arguments": {
+        "orderId": "order_1"
+      },
+      "status": "succeeded"
+    },
+    {
+      "sequence": 6,
+      "tool": "create_refund",
+      "arguments": {
+        "paymentId": "payment_1",
+        "amount": 12000
+      },
+      "status": "succeeded"
+    },
+    {
+      "sequence": 9,
+      "tool": "send_customer_reply",
+      "arguments": {
+        "conversationId": "conversation_1",
+        "message": "Your refund of $120.00 has been issued."
+      },
+      "status": "succeeded"
+    }
+  ]
+}
