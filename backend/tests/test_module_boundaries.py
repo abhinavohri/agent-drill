@@ -2,7 +2,8 @@ import ast
 import unittest
 from pathlib import Path
 
-DOMAINS = {"drill_mcp", "refunds", "simulations"}
+DOMAINS = {"drill_mcp", "evaluations", "refunds", "simulations", "workflows"}
+OFFLINE_DOMAINS = ("evaluations", "refunds", "workflows")
 APP_ROOT = Path(__file__).parents[1] / "app"
 MAX_SOURCE_LINES = 250
 MAX_TEST_LINES = 350
@@ -40,12 +41,12 @@ class ModuleBoundaryTests(unittest.TestCase):
 
         self.assertEqual(violations, [])
 
-    def test_refund_world_has_no_network_client_import(self) -> None:
-        refund_root = APP_ROOT / "refunds"
+    def test_offline_domains_have_no_network_client_import(self) -> None:
         prohibited = {"aiohttp", "httpx", "requests", "socket"}
         violations: list[str] = []
+        paths = [path for domain in OFFLINE_DOMAINS for path in (APP_ROOT / domain).rglob("*.py")]
 
-        for path in refund_root.rglob("*.py"):
+        for path in paths:
             tree = ast.parse(path.read_text(), filename=str(path))
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):

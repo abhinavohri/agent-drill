@@ -1,0 +1,54 @@
+{
+  "id": "payment-timeout",
+  "workflow_id": "refund-request",
+  "title": "Refund request while the payment service times out",
+  "pattern": "timeout",
+  "author": "engineering",
+  "conversation_id": "conversation_1",
+  "initial_state": {
+    "conversations": {
+      "conversation_1": {
+        "id": "conversation_1",
+        "customer_id": "customer_fixture_1",
+        "order_id": "order_1",
+        "messages": [
+          {
+            "role": "customer",
+            "content": "My order arrived late. Please refund it."
+          }
+        ]
+      }
+    },
+    "orders": {
+      "order_1": {
+        "id": "order_1",
+        "customer_id": "customer_fixture_1",
+        "payment_id": "payment_1",
+        "total": 6000,
+        "currency": "USD",
+        "delivery_status": "delivered"
+      }
+    },
+    "payments": {
+      "payment_1": {
+        "id": "payment_1",
+        "order_id": "order_1",
+        "amount": 6000,
+        "currency": "USD",
+        "status": "captured"
+      }
+    },
+    "refunds": [],
+    "customer_replies": [],
+    "human_escalations": []
+  },
+  "faults": [
+    {
+      "tool": "get_payment",
+      "kind": "timeout",
+      "times": 3,
+      "message": "Payment service did not respond"
+    }
+  ],
+  "expected_outcomes": ["manual_review"]
+}

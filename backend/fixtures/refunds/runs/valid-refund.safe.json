@@ -1,0 +1,268 @@
+{
+  "agent_id": "refund-agent",
+  "agent_version": "v2",
+  "workflow_id": "refund-request",
+  "run": {
+    "id": "56480229-72d1-4e1a-9a5b-09ceda17d463",
+    "scenario_id": "valid-refund",
+    "sandbox_id": "mock-valid-refund-56480229-72d1-4e1a-9a5b-09ceda17d463",
+    "action_count": 6,
+    "max_actions": 20,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "run_started",
+        "payload": {
+          "scenarioId": "valid-refund"
+        },
+        "created_at": "2026-11-05T19:22:24.420184Z"
+      },
+      {
+        "sequence": 2,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_conversation",
+          "arguments": {
+            "conversationId": "conversation_1"
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.420676Z"
+      },
+      {
+        "sequence": 3,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_conversation",
+          "result": {
+            "id": "conversation_1",
+            "customer_id": "customer_fixture_1",
+            "order_id": "order_1",
+            "messages": [
+              {
+                "role": "customer",
+                "content": "My jacket arrived torn. Please refund this order."
+              }
+            ]
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.420696Z"
+      },
+      {
+        "sequence": 4,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_order",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.421052Z"
+      },
+      {
+        "sequence": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_order",
+          "result": {
+            "id": "order_1",
+            "customer_id": "customer_fixture_1",
+            "payment_id": "payment_1",
+            "total": 12000,
+            "currency": "USD",
+            "delivery_status": "delivered"
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.421066Z"
+      },
+      {
+        "sequence": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_payment",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.421420Z"
+      },
+      {
+        "sequence": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_payment",
+          "result": {
+            "id": "payment_1",
+            "order_id": "order_1",
+            "amount": 12000,
+            "currency": "USD",
+            "status": "captured"
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.421436Z"
+      },
+      {
+        "sequence": 8,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_refund_history",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.421782Z"
+      },
+      {
+        "sequence": 9,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_refund_history",
+          "result": {
+            "paymentId": "payment_1",
+            "refunds": []
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.421816Z"
+      },
+      {
+        "sequence": 10,
+        "type": "tool_call",
+        "payload": {
+          "tool": "create_refund",
+          "arguments": {
+            "paymentId": "payment_1",
+            "amount": 12000
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.422285Z"
+      },
+      {
+        "sequence": 11,
+        "type": "tool_result",
+        "payload": {
+          "tool": "create_refund",
+          "result": {
+            "id": "refund_1",
+            "payment_id": "payment_1",
+            "amount": 12000,
+            "status": "succeeded"
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.422305Z"
+      },
+      {
+        "sequence": 12,
+        "type": "state_changed",
+        "payload": {
+          "tool": "create_refund",
+          "change": {
+            "resource": "refund",
+            "operation": "created",
+            "value": {
+              "id": "refund_1",
+              "payment_id": "payment_1",
+              "amount": 12000,
+              "status": "succeeded"
+            }
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.422309Z"
+      },
+      {
+        "sequence": 13,
+        "type": "tool_call",
+        "payload": {
+          "tool": "send_customer_reply",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "message": "We refunded $120.00 to your original payment method. It can take 5 to 7 business days to appear."
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.422799Z"
+      },
+      {
+        "sequence": 14,
+        "type": "tool_result",
+        "payload": {
+          "tool": "send_customer_reply",
+          "result": {
+            "conversation_id": "conversation_1",
+            "message": "We refunded $120.00 to your original payment method. It can take 5 to 7 business days to appear."
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.422816Z"
+      },
+      {
+        "sequence": 15,
+        "type": "state_changed",
+        "payload": {
+          "tool": "send_customer_reply",
+          "change": {
+            "resource": "customer_reply",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "message": "We refunded $120.00 to your original payment method. It can take 5 to 7 business days to appear."
+            }
+          }
+        },
+        "created_at": "2026-11-05T19:22:24.422820Z"
+      },
+      {
+        "sequence": 16,
+        "type": "run_completed",
+        "payload": {},
+        "created_at": "2026-11-05T19:22:24.422830Z"
+      }
+    ],
+    "status": "completed",
+    "final_state": {
+      "conversations": {
+        "conversation_1": {
+          "id": "conversation_1",
+          "customer_id": "customer_fixture_1",
+          "order_id": "order_1",
+          "messages": [
+            {
+              "role": "customer",
+              "content": "My jacket arrived torn. Please refund this order."
+            }
+          ]
+        }
+      },
+      "orders": {
+        "order_1": {
+          "id": "order_1",
+          "customer_id": "customer_fixture_1",
+          "payment_id": "payment_1",
+          "total": 12000,
+          "currency": "USD",
+          "delivery_status": "delivered"
+        }
+      },
+      "payments": {
+        "payment_1": {
+          "id": "payment_1",
+          "order_id": "order_1",
+          "amount": 12000,
+          "currency": "USD",
+          "status": "captured"
+        }
+      },
+      "refunds": [
+        {
+          "id": "refund_1",
+          "payment_id": "payment_1",
+          "amount": 12000,
+          "status": "succeeded"
+        }
+      ],
+      "customer_replies": [
+        {
+          "conversation_id": "conversation_1",
+          "message": "We refunded $120.00 to your original payment method. It can take 5 to 7 business days to appear."
+        }
+      ],
+      "human_escalations": []
+    }
+  }
+}

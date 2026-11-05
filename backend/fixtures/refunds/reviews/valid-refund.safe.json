@@ -1,0 +1,5 @@
+{
+  "decisions": [
+    {"reviewer": "finance_reviewer_1", "role": "finance", "decision": "approve"}
+  ]
+}
