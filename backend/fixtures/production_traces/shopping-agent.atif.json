@@ -1,0 +1,61 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "session_id": "shopping_fixture_run_1",
+  "trajectory_id": "shopping_fixture_trajectory_1",
+  "agent": {
+    "name": "shopping-agent",
+    "version": "fixture-v1",
+    "model_name": "fixture-model"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "timestamp": "2026-11-05T09:00:00Z",
+      "source": "user",
+      "message": "Find waterproof hiking shoes below $120."
+    },
+    {
+      "step_id": 2,
+      "timestamp": "2026-11-05T09:00:01Z",
+      "source": "agent",
+      "message": "I will check the available products.",
+      "tool_calls": [
+        {
+          "tool_call_id": "call_search_1",
+          "function_name": "search_products",
+          "arguments": {
+            "category": "hiking shoes",
+            "maximum_price": 120,
+            "waterproof": true
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "call_search_1",
+            "content": "One synthetic product matches the request."
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 40,
+        "completion_tokens": 15,
+        "cost_usd": 0.001
+      }
+    },
+    {
+      "step_id": 3,
+      "timestamp": "2026-11-05T09:00:02Z",
+      "source": "agent",
+      "message": "I found one matching product below your budget."
+    }
+  ],
+  "final_metrics": {
+    "total_prompt_tokens": 40,
+    "total_completion_tokens": 15,
+    "total_cost_usd": 0.001,
+    "total_steps": 3
+  },
+  "notes": "This is synthetic data for trace-ingestion tests."
+}

@@ -3,6 +3,7 @@ name = "agent-drill-backend"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "atif==1.7.0",
     "fastapi==0.136.0",
     "jsonschema==4.26.0",
     "mcp==1.29.1",

@@ -5,3 +5,6 @@
 __pycache__/
 *.py[cod]
 
+# External datasets have separate usage terms.
+backend/fixtures/external/**/*.json
+

@@ -29,6 +29,7 @@ These files let each workstream start before the shared contracts are complete.
 - `stubs/target-agent-calls.json` stands in for target-agent MCP calls.
 - `stubs/target-agent-responses.json` stands in for target-agent messages.
 - `stubs/run-events.json` and `stubs/final-state.json` are the evaluator handoff from Abhinav.
-- `production_traces/disputed-payment.json` is the redacted trace-ingestion example for Maqsud.
+- `production_traces/disputed-payment.json` is the legacy redacted trace handoff.
+- `production_traces/shopping-agent.atif.json` is the synthetic ATIF v1.7 ingestion fixture.
 
 Replace each stub with its approved shared contract. Do not add production secrets or customer data.

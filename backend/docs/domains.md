@@ -32,6 +32,13 @@ Its facade exports `evaluate_run`, `compare_results`, the report renderers, and 
 
 Hard checks (input schema, tool permissions, action order and invariants, and final state) use only the recorded run. Reviewer decisions and language-model judge assessments resolve only the semantic-output and human-approval checks, so they cannot override a hard failure.
 
+## Traces
+
+`app/traces/` owns ATIF trace validation and file ingestion. It uses the published ATIF
+Pydantic models and does not define a competing trace format.
+
+Its facade exports the ATIF `Trajectory` contract and the text and file ingestion operations.
+
 ## Process entry points
 
 `app/jobs/` is not a domain package. It contains stable process entry points that use domain facades.

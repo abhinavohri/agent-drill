@@ -1,0 +1,1 @@
+"""ATIF trace ingestion domain."""

@@ -28,6 +28,16 @@ The MCP process loads the disputed-payment fixture. It exposes the eight refund 
 
 Temporary cross-team inputs and outputs are in `fixtures/`. Replace them with the approved shared contracts when they are available.
 
+## Ingest an ATIF trace
+
+```sh
+uv run python -m app.jobs.ingest_trace \
+  fixtures/production_traces/shopping-agent.atif.json
+```
+
+The command validates one ATIF v1.7 trajectory and writes normalized JSON to standard output. Use
+`--output PATH` to write the normalized trajectory to a file.
+
 ## Evaluate a saved run
 
 ```sh

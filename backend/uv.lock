@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -13,6 +13,7 @@ name = "agent-drill-backend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "atif" },
     { name = "fastapi" },
     { name = "jsonschema" },
     { name = "mcp" },
@@ -27,6 +28,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "atif", specifier = "==1.7.0" },
     { name = "fastapi", specifier = "==0.136.0" },
     { name = "jsonschema", specifier = "==4.26.0" },
     { name = "mcp", specifier = "==1.29.1" },
@@ -66,6 +68,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a1/98/7e457a3b014976887a050561955c0b76e1e7e2d6e27b78ecef2ef80518f2/anyio-4.16.0.tar.gz", hash = "sha256:59bb03251907983d1603d27c3087ddb1e93299ea2163adcdba37899a4fb12ffb", size = 310971, upload-time = "2026-11-01T11:20:07.282Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/16/7757fb84c819accc7d7e9af5291b261e4abb8627ee040f99e7d35ef2457a/anyio-4.16.0-py3-none-any.whl", hash = "sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026", size = 134521, upload-time = "2026-11-01T11:20:05.59Z" },
+]
+
+[[package]]
+name = "atif"
+version = "1.7.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c1/14/b0629cab0a86470c31d530498fc39c65a8385eaf95f4f39dbcde695284c5/atif-1.7.0.tar.gz", hash = "sha256:668cf3d4592a2147e62a4c2fc3663faacb3217a1627b395a1e0f354076f79d3f", size = 9613, upload-time = "2026-05-16T05:23:02.163Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ba/97/cddb7c5cebe218534563533600eacc57beaace90ee85c435126214f5b18b/atif-1.7.0-py3-none-any.whl", hash = "sha256:7bb0c09a6d94ff5a73f6253a2aeb101d41d0724cfd0cdb8d96541ac4f2b7ab6c", size = 12346, upload-time = "2026-05-16T05:23:00.825Z" },
 ]
 
 [[package]]

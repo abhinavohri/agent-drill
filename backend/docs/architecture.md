@@ -29,5 +29,8 @@ The `workflows` domain imports the `refunds` facade for scenario state and the r
 
 The `evaluations` domain imports the `workflows`, `simulations`, and `refunds` facades. No domain imports `evaluations`. Only process entry points use it.
 
-`app/main.py` assembles the HTTP application. `app/jobs/drill_mcp.py` is the stable stdio MCP entry point. `app/jobs/evaluate_run.py` evaluates a saved run and writes its report. `app/jobs/build_refund_fixtures.py` plays the scripted agent runs against the refund world through the Drill proxy and regenerates the saved runs, results, and reports.
+The `traces` domain validates external ATIF documents. It has no dependency on a target-agent
+domain. Process entry points and future evaluators use its facade.
+
+`app/main.py` assembles the HTTP application. `app/jobs/drill_mcp.py` is the stable stdio MCP entry point. `app/jobs/ingest_trace.py` validates and normalizes one ATIF trajectory. `app/jobs/evaluate_run.py` evaluates a saved run and writes its report. `app/jobs/build_refund_fixtures.py` plays the scripted agent runs against the refund world through the Drill proxy and regenerates the saved runs, results, and reports.
 
