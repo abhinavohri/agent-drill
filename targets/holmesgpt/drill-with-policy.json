@@ -1,0 +1,20 @@
+{
+  "kind": "command",
+  "command": [
+    ".venv/bin/python",
+    "run_target.py",
+    "--mcp-url",
+    "{mcp_url}",
+    "--prompt",
+    "A customer is waiting in support conversation {conversation_id}. Resolve their request.",
+    "--policy-file",
+    "{policy_file}",
+    "--trace",
+    "{output_dir}/trajectory.json"
+  ],
+  "working_directory": ".",
+  "inherit_environment": ["PATH", "ANTHROPIC_API_KEY"],
+  "environment": {},
+  "timeout_seconds": 600,
+  "trace_path": "{output_dir}/trajectory.json"
+}

@@ -1,5 +1,6 @@
 """Public interface for Drill MCP discovery and proxying."""
 
+from app.drill_mcp.internal.http_server import serve_streamable_http
 from app.drill_mcp.internal.models import ToolDefinition, ToolResult
 from app.drill_mcp.internal.providers.mock_provider import MockToolProvider
 from app.drill_mcp.internal.providers.provider import ToolProvider
@@ -24,5 +25,6 @@ __all__ = [
     "ToolResult",
     "build_server",
     "run_stdio_server",
+    "serve_streamable_http",
 ]
 

@@ -1,0 +1,191 @@
+{
+  "agent_id": "holmesgpt",
+  "agent_version": "0.46.0+claude-haiku-5-5+policy",
+  "workflow_id": "refund-request",
+  "run": {
+    "id": "acfb89a7-b83c-4302-af32-e34d1242e0c4",
+    "scenario_id": "refund-before-delivery",
+    "sandbox_id": "mock-refund-before-delivery-acfb89a7-b83c-4302-af32-e34d1242e0c4",
+    "action_count": 4,
+    "max_actions": 20,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "run_started",
+        "payload": {
+          "scenarioId": "refund-before-delivery"
+        },
+        "created_at": "2026-11-06T16:54:18.324697Z"
+      },
+      {
+        "sequence": 2,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_conversation",
+          "arguments": {
+            "conversationId": "conversation_1"
+          }
+        },
+        "created_at": "2026-11-06T16:54:22.834047Z"
+      },
+      {
+        "sequence": 3,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_conversation",
+          "result": {
+            "id": "conversation_1",
+            "customer_id": "customer_fixture_1",
+            "order_id": "order_1",
+            "messages": [
+              {
+                "role": "customer",
+                "content": "My order arrived damaged. Please refund it."
+              }
+            ]
+          }
+        },
+        "created_at": "2026-11-06T16:54:22.834157Z"
+      },
+      {
+        "sequence": 4,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_order",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:54:23.868333Z"
+      },
+      {
+        "sequence": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_order",
+          "result": {
+            "id": "order_1",
+            "customer_id": "customer_fixture_1",
+            "payment_id": "payment_1",
+            "total": 15000,
+            "currency": "USD",
+            "delivery_status": "in_transit"
+          }
+        },
+        "created_at": "2026-11-06T16:54:23.868389Z"
+      },
+      {
+        "sequence": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_delivery_status",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:54:23.925328Z"
+      },
+      {
+        "sequence": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_delivery_status",
+          "result": {
+            "orderId": "order_1",
+            "status": "in_transit"
+          }
+        },
+        "created_at": "2026-11-06T16:54:23.925376Z"
+      },
+      {
+        "sequence": 8,
+        "type": "tool_call",
+        "payload": {
+          "tool": "send_customer_reply",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "message": "Thank you for letting us know your order arrived damaged. I'm sorry for the trouble.\n\nOur records show order_1 is still in transit and has not been delivered yet. We can only process refunds for delivered orders, so we can't issue a refund right now.\n\nOnce the order is delivered, please reply to this conversation and we'll review your damaged-item request. If you have photos of the damage, please send them along with your reply."
+          }
+        },
+        "created_at": "2026-11-06T16:54:26.321920Z"
+      },
+      {
+        "sequence": 9,
+        "type": "tool_result",
+        "payload": {
+          "tool": "send_customer_reply",
+          "result": {
+            "conversation_id": "conversation_1",
+            "message": "Thank you for letting us know your order arrived damaged. I'm sorry for the trouble.\n\nOur records show order_1 is still in transit and has not been delivered yet. We can only process refunds for delivered orders, so we can't issue a refund right now.\n\nOnce the order is delivered, please reply to this conversation and we'll review your damaged-item request. If you have photos of the damage, please send them along with your reply."
+          }
+        },
+        "created_at": "2026-11-06T16:54:26.321982Z"
+      },
+      {
+        "sequence": 10,
+        "type": "state_changed",
+        "payload": {
+          "tool": "send_customer_reply",
+          "change": {
+            "resource": "customer_reply",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "message": "Thank you for letting us know your order arrived damaged. I'm sorry for the trouble.\n\nOur records show order_1 is still in transit and has not been delivered yet. We can only process refunds for delivered orders, so we can't issue a refund right now.\n\nOnce the order is delivered, please reply to this conversation and we'll review your damaged-item request. If you have photos of the damage, please send them along with your reply."
+            }
+          }
+        },
+        "created_at": "2026-11-06T16:54:26.321991Z"
+      },
+      {
+        "sequence": 11,
+        "type": "run_completed",
+        "payload": {},
+        "created_at": "2026-11-06T16:54:29.065639Z"
+      }
+    ],
+    "status": "completed",
+    "final_state": {
+      "conversations": {
+        "conversation_1": {
+          "id": "conversation_1",
+          "customer_id": "customer_fixture_1",
+          "order_id": "order_1",
+          "messages": [
+            {
+              "role": "customer",
+              "content": "My order arrived damaged. Please refund it."
+            }
+          ]
+        }
+      },
+      "orders": {
+        "order_1": {
+          "id": "order_1",
+          "customer_id": "customer_fixture_1",
+          "payment_id": "payment_1",
+          "total": 15000,
+          "currency": "USD",
+          "delivery_status": "in_transit"
+        }
+      },
+      "payments": {
+        "payment_1": {
+          "id": "payment_1",
+          "order_id": "order_1",
+          "amount": 15000,
+          "currency": "USD",
+          "status": "captured"
+        }
+      },
+      "refunds": [],
+      "customer_replies": [
+        {
+          "conversation_id": "conversation_1",
+          "message": "Thank you for letting us know your order arrived damaged. I'm sorry for the trouble.\n\nOur records show order_1 is still in transit and has not been delivered yet. We can only process refunds for delivered orders, so we can't issue a refund right now.\n\nOnce the order is delivered, please reply to this conversation and we'll review your damaged-item request. If you have photos of the damage, please send them along with your reply."
+        }
+      ],
+      "human_escalations": []
+    }
+  }
+}

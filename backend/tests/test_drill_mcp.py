@@ -1,11 +1,16 @@
 import unittest
 
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
+from mcp.types import CallToolResult
+
 from app.drill_mcp.facade import (
     DrillProxyService,
     InvalidToolArgumentsError,
     MockToolProvider,
     ToolNotAllowedError,
     ToolProviderTimeoutError,
+    serve_streamable_http,
 )
 from app.simulations.facade import (
     ActionLimitExceededError,
@@ -81,4 +86,36 @@ class DrillProxyServiceTests(unittest.IsolatedAsyncioTestCase):
         failed = self.simulations.get_run(limited.id)
         self.assertEqual(failed.status, RunStatus.FAILED)
         self.assertNotIn(limited.sandbox_id, self.sandbox.active_ids)
+
+
+class DrillHttpServerTests(unittest.IsolatedAsyncioTestCase):
+    async def test_separate_sessions_record_into_one_run(self) -> None:
+        simulations = SimulationService(MockSandbox())
+        run = await simulations.start_run("http-test")
+        proxy = DrillProxyService(MockToolProvider(), simulations)
+        await proxy.initialize()
+        try:
+            async with serve_streamable_http(proxy, run.id) as url:
+                first = await _call_in_new_session(url, "pay_1")
+                second = await _call_in_new_session(url, "pay_2")
+        finally:
+            await proxy.close()
+
+        calls = [
+            event.payload.arguments
+            for event in simulations.get_run(run.id).events
+            if event.type is RunEventType.TOOL_CALL
+        ]
+        self.assertEqual(calls, [{"paymentId": "pay_1"}, {"paymentId": "pay_2"}])
+        self.assertFalse(first.isError)
+        self.assertFalse(second.isError)
+
+
+async def _call_in_new_session(url: str, payment_id: str) -> CallToolResult:
+    async with (
+        streamablehttp_client(url) as (read, write, _),
+        ClientSession(read, write) as session,
+    ):
+        await session.initialize()
+        return await session.call_tool("get_payment", {"paymentId": payment_id})
 

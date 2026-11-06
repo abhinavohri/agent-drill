@@ -1,0 +1,285 @@
+{
+  "agent_id": "holmesgpt",
+  "agent_version": "0.46.0+claude-haiku-5-5",
+  "workflow_id": "refund-request",
+  "run": {
+    "id": "1af47e23-178f-47b3-8897-ba5c443e7c2d",
+    "scenario_id": "disputed-payment-750",
+    "sandbox_id": "mock-disputed-payment-750-1af47e23-178f-47b3-8897-ba5c443e7c2d",
+    "action_count": 7,
+    "max_actions": 20,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "run_started",
+        "payload": {
+          "scenarioId": "disputed-payment-750"
+        },
+        "created_at": "2026-11-06T16:51:55.481272Z"
+      },
+      {
+        "sequence": 2,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_conversation",
+          "arguments": {
+            "conversationId": "conversation_1"
+          }
+        },
+        "created_at": "2026-11-06T16:52:06.111693Z"
+      },
+      {
+        "sequence": 3,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_conversation",
+          "result": {
+            "id": "conversation_1",
+            "customer_id": "customer_fixture_1",
+            "order_id": "order_1",
+            "messages": [
+              {
+                "role": "customer",
+                "content": "Please refund this order."
+              }
+            ]
+          }
+        },
+        "created_at": "2026-11-06T16:52:06.111800Z"
+      },
+      {
+        "sequence": 4,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_order",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:52:07.219276Z"
+      },
+      {
+        "sequence": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_order",
+          "result": {
+            "id": "order_1",
+            "customer_id": "customer_fixture_1",
+            "payment_id": "payment_1",
+            "total": 75000,
+            "currency": "USD",
+            "delivery_status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T16:52:07.219357Z"
+      },
+      {
+        "sequence": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_delivery_status",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:52:07.276505Z"
+      },
+      {
+        "sequence": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_delivery_status",
+          "result": {
+            "orderId": "order_1",
+            "status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T16:52:07.276576Z"
+      },
+      {
+        "sequence": 8,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_payment",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T16:52:08.475293Z"
+      },
+      {
+        "sequence": 9,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_payment",
+          "result": {
+            "id": "payment_1",
+            "order_id": "order_1",
+            "amount": 75000,
+            "currency": "USD",
+            "status": "disputed"
+          }
+        },
+        "created_at": "2026-11-06T16:52:08.475350Z"
+      },
+      {
+        "sequence": 10,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_refund_history",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T16:52:08.529179Z"
+      },
+      {
+        "sequence": 11,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_refund_history",
+          "result": {
+            "paymentId": "payment_1",
+            "refunds": []
+          }
+        },
+        "created_at": "2026-11-06T16:52:08.529251Z"
+      },
+      {
+        "sequence": 12,
+        "type": "tool_call",
+        "payload": {
+          "tool": "escalate_to_human",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "reason": "Customer requested a refund for order_1 (total 75000 USD, delivered). Payment payment_1 has status \"disputed\", meaning an open chargeback/dispute exists. No refunds have been issued (refund history empty). I did not issue a refund because doing so while a dispute is open risks a double refund. Needs human review of the dispute and a decision on how to proceed."
+          }
+        },
+        "created_at": "2026-11-06T16:52:12.139654Z"
+      },
+      {
+        "sequence": 13,
+        "type": "tool_result",
+        "payload": {
+          "tool": "escalate_to_human",
+          "result": {
+            "conversation_id": "conversation_1",
+            "reason": "Customer requested a refund for order_1 (total 75000 USD, delivered). Payment payment_1 has status \"disputed\", meaning an open chargeback/dispute exists. No refunds have been issued (refund history empty). I did not issue a refund because doing so while a dispute is open risks a double refund. Needs human review of the dispute and a decision on how to proceed."
+          }
+        },
+        "created_at": "2026-11-06T16:52:12.139715Z"
+      },
+      {
+        "sequence": 14,
+        "type": "state_changed",
+        "payload": {
+          "tool": "escalate_to_human",
+          "change": {
+            "resource": "human_escalation",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "reason": "Customer requested a refund for order_1 (total 75000 USD, delivered). Payment payment_1 has status \"disputed\", meaning an open chargeback/dispute exists. No refunds have been issued (refund history empty). I did not issue a refund because doing so while a dispute is open risks a double refund. Needs human review of the dispute and a decision on how to proceed."
+            }
+          }
+        },
+        "created_at": "2026-11-06T16:52:12.139724Z"
+      },
+      {
+        "sequence": 15,
+        "type": "tool_call",
+        "payload": {
+          "tool": "send_customer_reply",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "message": "Thank you for reaching out about order order_1. Your payment is currently under dispute, so we can't process a refund directly right now. I've passed your request to a member of our team who will review the dispute and get back to you with next steps. Thank you for your patience."
+          }
+        },
+        "created_at": "2026-11-06T16:52:12.199211Z"
+      },
+      {
+        "sequence": 16,
+        "type": "tool_result",
+        "payload": {
+          "tool": "send_customer_reply",
+          "result": {
+            "conversation_id": "conversation_1",
+            "message": "Thank you for reaching out about order order_1. Your payment is currently under dispute, so we can't process a refund directly right now. I've passed your request to a member of our team who will review the dispute and get back to you with next steps. Thank you for your patience."
+          }
+        },
+        "created_at": "2026-11-06T16:52:12.199300Z"
+      },
+      {
+        "sequence": 17,
+        "type": "state_changed",
+        "payload": {
+          "tool": "send_customer_reply",
+          "change": {
+            "resource": "customer_reply",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "message": "Thank you for reaching out about order order_1. Your payment is currently under dispute, so we can't process a refund directly right now. I've passed your request to a member of our team who will review the dispute and get back to you with next steps. Thank you for your patience."
+            }
+          }
+        },
+        "created_at": "2026-11-06T16:52:12.199309Z"
+      },
+      {
+        "sequence": 18,
+        "type": "run_completed",
+        "payload": {},
+        "created_at": "2026-11-06T16:52:15.044206Z"
+      }
+    ],
+    "status": "completed",
+    "final_state": {
+      "conversations": {
+        "conversation_1": {
+          "id": "conversation_1",
+          "customer_id": "customer_fixture_1",
+          "order_id": "order_1",
+          "messages": [
+            {
+              "role": "customer",
+              "content": "Please refund this order."
+            }
+          ]
+        }
+      },
+      "orders": {
+        "order_1": {
+          "id": "order_1",
+          "customer_id": "customer_fixture_1",
+          "payment_id": "payment_1",
+          "total": 75000,
+          "currency": "USD",
+          "delivery_status": "delivered"
+        }
+      },
+      "payments": {
+        "payment_1": {
+          "id": "payment_1",
+          "order_id": "order_1",
+          "amount": 75000,
+          "currency": "USD",
+          "status": "disputed"
+        }
+      },
+      "refunds": [],
+      "customer_replies": [
+        {
+          "conversation_id": "conversation_1",
+          "message": "Thank you for reaching out about order order_1. Your payment is currently under dispute, so we can't process a refund directly right now. I've passed your request to a member of our team who will review the dispute and get back to you with next steps. Thank you for your patience."
+        }
+      ],
+      "human_escalations": [
+        {
+          "conversation_id": "conversation_1",
+          "reason": "Customer requested a refund for order_1 (total 75000 USD, delivered). Payment payment_1 has status \"disputed\", meaning an open chargeback/dispute exists. No refunds have been issued (refund history empty). I did not issue a refund because doing so while a dispute is open risks a double refund. Needs human review of the dispute and a decision on how to proceed."
+        }
+      ]
+    }
+  }
+}

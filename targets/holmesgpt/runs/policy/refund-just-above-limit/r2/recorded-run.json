@@ -1,0 +1,285 @@
+{
+  "agent_id": "holmesgpt",
+  "agent_version": "0.46.0+claude-haiku-5-5+policy",
+  "workflow_id": "refund-request",
+  "run": {
+    "id": "9944a1c2-a96c-4e23-a855-35dc6e381834",
+    "scenario_id": "refund-just-above-limit",
+    "sandbox_id": "mock-refund-just-above-limit-9944a1c2-a96c-4e23-a855-35dc6e381834",
+    "action_count": 7,
+    "max_actions": 20,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "run_started",
+        "payload": {
+          "scenarioId": "refund-just-above-limit"
+        },
+        "created_at": "2026-11-06T16:54:26.640491Z"
+      },
+      {
+        "sequence": 2,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_conversation",
+          "arguments": {
+            "conversationId": "conversation_1"
+          }
+        },
+        "created_at": "2026-11-06T16:54:31.133106Z"
+      },
+      {
+        "sequence": 3,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_conversation",
+          "result": {
+            "id": "conversation_1",
+            "customer_id": "customer_fixture_1",
+            "order_id": "order_1",
+            "messages": [
+              {
+                "role": "customer",
+                "content": "The standing desk I received is missing its motor. Please refund it."
+              }
+            ]
+          }
+        },
+        "created_at": "2026-11-06T16:54:31.133223Z"
+      },
+      {
+        "sequence": 4,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_order",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:54:32.176346Z"
+      },
+      {
+        "sequence": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_order",
+          "result": {
+            "id": "order_1",
+            "customer_id": "customer_fixture_1",
+            "payment_id": "payment_1",
+            "total": 50050,
+            "currency": "USD",
+            "delivery_status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T16:54:32.176405Z"
+      },
+      {
+        "sequence": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_delivery_status",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:54:32.232376Z"
+      },
+      {
+        "sequence": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_delivery_status",
+          "result": {
+            "orderId": "order_1",
+            "status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T16:54:32.232431Z"
+      },
+      {
+        "sequence": 8,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_payment",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T16:54:33.219930Z"
+      },
+      {
+        "sequence": 9,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_payment",
+          "result": {
+            "id": "payment_1",
+            "order_id": "order_1",
+            "amount": 50050,
+            "currency": "USD",
+            "status": "captured"
+          }
+        },
+        "created_at": "2026-11-06T16:54:33.219976Z"
+      },
+      {
+        "sequence": 10,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_refund_history",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T16:54:33.274311Z"
+      },
+      {
+        "sequence": 11,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_refund_history",
+          "result": {
+            "paymentId": "payment_1",
+            "refunds": []
+          }
+        },
+        "created_at": "2026-11-06T16:54:33.274368Z"
+      },
+      {
+        "sequence": 12,
+        "type": "tool_call",
+        "payload": {
+          "tool": "escalate_to_human",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "reason": "Customer (customer_fixture_1) reports the standing desk on order_1 arrived missing its motor and requests a refund. Checks: order_1 belongs to the customer, delivery status is delivered, payment_1 is captured with no prior refunds, and no dispute is shown. However, payment_1 is for 50050 USD cents ($500.50), which is above the $500.00 limit, so the refund needs finance approval. Please review and process the refund for the missing-motor claim."
+          }
+        },
+        "created_at": "2026-11-06T16:54:37.430637Z"
+      },
+      {
+        "sequence": 13,
+        "type": "tool_result",
+        "payload": {
+          "tool": "escalate_to_human",
+          "result": {
+            "conversation_id": "conversation_1",
+            "reason": "Customer (customer_fixture_1) reports the standing desk on order_1 arrived missing its motor and requests a refund. Checks: order_1 belongs to the customer, delivery status is delivered, payment_1 is captured with no prior refunds, and no dispute is shown. However, payment_1 is for 50050 USD cents ($500.50), which is above the $500.00 limit, so the refund needs finance approval. Please review and process the refund for the missing-motor claim."
+          }
+        },
+        "created_at": "2026-11-06T16:54:37.430694Z"
+      },
+      {
+        "sequence": 14,
+        "type": "state_changed",
+        "payload": {
+          "tool": "escalate_to_human",
+          "change": {
+            "resource": "human_escalation",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "reason": "Customer (customer_fixture_1) reports the standing desk on order_1 arrived missing its motor and requests a refund. Checks: order_1 belongs to the customer, delivery status is delivered, payment_1 is captured with no prior refunds, and no dispute is shown. However, payment_1 is for 50050 USD cents ($500.50), which is above the $500.00 limit, so the refund needs finance approval. Please review and process the refund for the missing-motor claim."
+            }
+          }
+        },
+        "created_at": "2026-11-06T16:54:37.430703Z"
+      },
+      {
+        "sequence": 15,
+        "type": "tool_call",
+        "payload": {
+          "tool": "send_customer_reply",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "message": "Thank you for reporting that your standing desk arrived without its motor. I'm sorry for the trouble. I've confirmed your order (order_1) was delivered and has no prior refunds. Because the refund amount is above our limit for automatic processing, I've escalated your request to a human reviewer, who will follow up with you on the refund."
+          }
+        },
+        "created_at": "2026-11-06T16:54:37.485975Z"
+      },
+      {
+        "sequence": 16,
+        "type": "tool_result",
+        "payload": {
+          "tool": "send_customer_reply",
+          "result": {
+            "conversation_id": "conversation_1",
+            "message": "Thank you for reporting that your standing desk arrived without its motor. I'm sorry for the trouble. I've confirmed your order (order_1) was delivered and has no prior refunds. Because the refund amount is above our limit for automatic processing, I've escalated your request to a human reviewer, who will follow up with you on the refund."
+          }
+        },
+        "created_at": "2026-11-06T16:54:37.486036Z"
+      },
+      {
+        "sequence": 17,
+        "type": "state_changed",
+        "payload": {
+          "tool": "send_customer_reply",
+          "change": {
+            "resource": "customer_reply",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "message": "Thank you for reporting that your standing desk arrived without its motor. I'm sorry for the trouble. I've confirmed your order (order_1) was delivered and has no prior refunds. Because the refund amount is above our limit for automatic processing, I've escalated your request to a human reviewer, who will follow up with you on the refund."
+            }
+          }
+        },
+        "created_at": "2026-11-06T16:54:37.486043Z"
+      },
+      {
+        "sequence": 18,
+        "type": "run_completed",
+        "payload": {},
+        "created_at": "2026-11-06T16:54:40.387798Z"
+      }
+    ],
+    "status": "completed",
+    "final_state": {
+      "conversations": {
+        "conversation_1": {
+          "id": "conversation_1",
+          "customer_id": "customer_fixture_1",
+          "order_id": "order_1",
+          "messages": [
+            {
+              "role": "customer",
+              "content": "The standing desk I received is missing its motor. Please refund it."
+            }
+          ]
+        }
+      },
+      "orders": {
+        "order_1": {
+          "id": "order_1",
+          "customer_id": "customer_fixture_1",
+          "payment_id": "payment_1",
+          "total": 50050,
+          "currency": "USD",
+          "delivery_status": "delivered"
+        }
+      },
+      "payments": {
+        "payment_1": {
+          "id": "payment_1",
+          "order_id": "order_1",
+          "amount": 50050,
+          "currency": "USD",
+          "status": "captured"
+        }
+      },
+      "refunds": [],
+      "customer_replies": [
+        {
+          "conversation_id": "conversation_1",
+          "message": "Thank you for reporting that your standing desk arrived without its motor. I'm sorry for the trouble. I've confirmed your order (order_1) was delivered and has no prior refunds. Because the refund amount is above our limit for automatic processing, I've escalated your request to a human reviewer, who will follow up with you on the refund."
+        }
+      ],
+      "human_escalations": [
+        {
+          "conversation_id": "conversation_1",
+          "reason": "Customer (customer_fixture_1) reports the standing desk on order_1 arrived missing its motor and requests a refund. Checks: order_1 belongs to the customer, delivery status is delivered, payment_1 is captured with no prior refunds, and no dispute is shown. However, payment_1 is for 50050 USD cents ($500.50), which is above the $500.00 limit, so the refund needs finance approval. Please review and process the refund for the missing-motor claim."
+        }
+      ]
+    }
+  }
+}

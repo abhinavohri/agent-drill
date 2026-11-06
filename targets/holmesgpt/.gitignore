@@ -1,0 +1,4 @@
+runs/**/*
+!runs/**/
+!runs/**/trajectory.json
+!runs/**/recorded-run.json
