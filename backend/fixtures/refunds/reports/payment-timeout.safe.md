@@ -16,7 +16,7 @@
 | --- | --- | --- | --- |
 | Input schema | hard | passed | valid-tool-arguments (passed) |
 | Tool permissions | hard | passed | declared-tools-only (passed) |
-| Action order and invariants | hard | passed | read-before-refund (passed), no-refund-disputed-payment (passed), no-duplicate-refund (passed), refund-approval-limit (passed) |
+| Action order and invariants | hard | passed | read-before-refund (passed), no-refund-disputed-payment (passed), no-duplicate-refund (passed), refund-approval-limit (passed), refund-own-orders-only (passed), refund-delivered-orders-only (passed), recheck-before-refund-retry (passed) |
 | Final state | hard | passed | run-completed (passed), expected-outcome (passed) |
 | Semantic output | review | passed | customer-reply-review (passed) |
 | Human approval | review | passed | release-approval (passed) |

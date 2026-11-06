@@ -1,13 +1,13 @@
-from dataclasses import dataclass
+from collections.abc import Sequence
 
 from app.evaluations.internal.context import RuleContext
 from app.evaluations.internal.formatting import join_words, money
-from app.evaluations.internal.models import CheckName, RuleResult
-from app.evaluations.internal.results import RuleIdentity, Violation, judge_violations
+from app.evaluations.internal.models import RuleResult
+from app.evaluations.internal.refund_attempts import RefundAttempt, refund_attempts
+from app.evaluations.internal.results import Violation, judge_violations, policy_identity
 from app.evaluations.internal.trace import ToolAttempt
 from app.refunds.facade import (
     ConversationArguments,
-    CreateRefundArguments,
     OrderArguments,
     PaymentArguments,
     RefundState,
@@ -16,47 +16,19 @@ from app.workflows.facade import (
     DisputedPaymentRule,
     DuplicateRefundRule,
     RefundLimitRule,
+    RefundRetryRule,
     RequiredReadsRule,
-    RuleSpec,
 )
 
 DISPUTED_PAYMENT_STATUS = "disputed"
-
-
-@dataclass(frozen=True)
-class RefundAttempt:
-    attempt: ToolAttempt
-    arguments: CreateRefundArguments
-
-    @property
-    def sequence(self) -> int:
-        return self.attempt.call_sequence
-
-    @property
-    def payment_id(self) -> str:
-        return self.arguments.payment_id
+RUN_START = 0
 
 
 def check_required_reads(rule: RequiredReadsRule, context: RuleContext) -> RuleResult:
-    state = context.scenario.initial_state
-    refunds = _refund_attempts(context)
+    refunds = refund_attempts(context)
     violations: list[Violation] = []
     for refund in refunds:
-        payment = state.payments.get(refund.payment_id)
-        order_id = None if payment is None else payment.order_id
-        earlier_reads = [
-            attempt
-            for attempt in context.trace.attempts
-            if attempt.succeeded and attempt.call_sequence < refund.sequence
-        ]
-        missing = [
-            tool
-            for tool in rule.tools
-            if not any(
-                read.tool == tool and _reads_refund_subject(read, refund.payment_id, order_id, state)
-                for read in earlier_reads
-            )
-        ]
+        missing = _missing_reads(context, rule.tools, refund, after=RUN_START)
         if missing:
             violations.append(
                 Violation(
@@ -66,13 +38,13 @@ def check_required_reads(rule: RequiredReadsRule, context: RuleContext) -> RuleR
                 )
             )
     passed = "Every refund followed the required reads." if refunds else "No refund was attempted."
-    return judge_violations(_identity(rule), violations, passed)
+    return judge_violations(policy_identity(rule), violations, passed)
 
 
 def check_disputed_payment(rule: DisputedPaymentRule, context: RuleContext) -> RuleResult:
     payments = context.scenario.initial_state.payments
     violations: list[Violation] = []
-    for refund in _refund_attempts(context):
+    for refund in refund_attempts(context):
         payment = payments.get(refund.payment_id)
         if payment is None or payment.status != DISPUTED_PAYMENT_STATUS:
             continue
@@ -88,7 +60,7 @@ def check_disputed_payment(rule: DisputedPaymentRule, context: RuleContext) -> R
             )
         )
     return judge_violations(
-        _identity(rule),
+        policy_identity(rule),
         violations,
         "No refund was attempted for a disputed payment.",
     )
@@ -100,7 +72,7 @@ def check_duplicate_refund(rule: DuplicateRefundRule, context: RuleContext) -> R
         existing_paths.setdefault(existing.payment_id, f"initial_state.refunds[{index}]")
     refunded_at: dict[str, int] = {}
     violations: list[Violation] = []
-    for refund in _refund_attempts(context):
+    for refund in refund_attempts(context):
         message = (
             f"Event {refund.sequence} attempts another refund for {refund.payment_id}, "
             "which already has a refund."
@@ -123,7 +95,7 @@ def check_duplicate_refund(rule: DuplicateRefundRule, context: RuleContext) -> R
         if refund.attempt.succeeded:
             refunded_at.setdefault(refund.payment_id, refund.sequence)
     return judge_violations(
-        _identity(rule),
+        policy_identity(rule),
         violations,
         "No payment received a second refund attempt.",
     )
@@ -131,31 +103,89 @@ def check_duplicate_refund(rule: DuplicateRefundRule, context: RuleContext) -> R
 
 def check_refund_limit(rule: RefundLimitRule, context: RuleContext) -> RuleResult:
     limit = money(rule.limit_cents)
-    violations = [
-        Violation(
-            f"Event {refund.sequence} attempts a {money(refund.arguments.amount)} refund, "
-            f"above the {limit} approval limit.",
-            refund.attempt.evidence_sequences,
-        )
-        for refund in _refund_attempts(context)
-        if refund.arguments.amount > rule.limit_cents
-    ]
+    refunded: dict[str, int] = {}
+    violations: list[Violation] = []
+    for refund in refund_attempts(context):
+        earlier = refunded.get(refund.payment_id, 0)
+        total = earlier + refund.arguments.amount
+        if total > rule.limit_cents:
+            violations.append(
+                Violation(
+                    _limit_message(refund, earlier, total, limit),
+                    refund.attempt.evidence_sequences,
+                )
+            )
+        if refund.attempt.succeeded:
+            refunded[refund.payment_id] = total
     return judge_violations(
-        _identity(rule),
+        policy_identity(rule),
         violations,
-        f"No refund attempt exceeded the {limit} approval limit.",
+        f"Refunds stayed within the {limit} approval limit for every payment.",
     )
 
 
-def _identity(rule: RuleSpec) -> RuleIdentity:
-    return RuleIdentity(rule.id, rule.owner, rule.policy, CheckName.ACTION_ORDER)
+def _limit_message(refund: RefundAttempt, earlier: int, total: int, limit: str) -> str:
+    amount = money(refund.arguments.amount)
+    if earlier == 0:
+        return f"Event {refund.sequence} attempts a {amount} refund, above the {limit} approval limit."
+    return (
+        f"Event {refund.sequence} attempts a {amount} refund that brings {refund.payment_id} "
+        f"to {money(total)}, above the {limit} approval limit."
+    )
 
 
-def _refund_attempts(context: RuleContext) -> list[RefundAttempt]:
-    return [
-        RefundAttempt(attempt, attempt.arguments)
+def check_refund_retry(rule: RefundRetryRule, context: RuleContext) -> RuleResult:
+    failed_at: dict[str, int] = {}
+    retried = False
+    violations: list[Violation] = []
+    for refund in refund_attempts(context):
+        failure = failed_at.get(refund.payment_id)
+        if failure is not None:
+            retried = True
+            missing = _missing_reads(context, rule.tools, refund, after=failure)
+            if missing:
+                violations.append(
+                    Violation(
+                        f"Event {refund.sequence} retries the refund for {refund.payment_id} "
+                        f"without a new {join_words(missing)} after the failed attempt at "
+                        f"event {failure}.",
+                        refund.attempt.evidence_sequences,
+                    )
+                )
+        if refund.attempt.succeeded:
+            failed_at.pop(refund.payment_id, None)
+        else:
+            failed_at[refund.payment_id] = refund.sequence
+    passed = (
+        f"Every retried refund followed a new {join_words(rule.tools)}."
+        if retried
+        else "No failed refund was retried."
+    )
+    return judge_violations(policy_identity(rule), violations, passed)
+
+
+def _missing_reads(
+    context: RuleContext,
+    tools: Sequence[str],
+    refund: RefundAttempt,
+    *,
+    after: int,
+) -> list[str]:
+    state = context.scenario.initial_state
+    payment = state.payments.get(refund.payment_id)
+    order_id = None if payment is None else payment.order_id
+    reads = [
+        attempt
         for attempt in context.trace.attempts
-        if isinstance(attempt.arguments, CreateRefundArguments)
+        if attempt.succeeded and after < attempt.call_sequence < refund.sequence
+    ]
+    return [
+        tool
+        for tool in tools
+        if not any(
+            read.tool == tool and _reads_refund_subject(read, refund.payment_id, order_id, state)
+            for read in reads
+        )
     ]
 
 

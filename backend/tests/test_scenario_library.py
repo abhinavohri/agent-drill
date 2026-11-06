@@ -158,6 +158,14 @@ class ScenarioLibraryTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaisesRegex(ValidationError, "undeclared tools: create_refund"):
             WorkflowSpec.model_validate(data)
 
+    def test_retry_recheck_tools_must_be_read_tools(self) -> None:
+        data = self.library.workflow("refund-request").model_dump(mode="json")
+        retry = next(item for item in data["rules"] if item["kind"] == "recheck_before_refund_retry")
+        retry["tools"] = ["create_refund"]
+
+        with self.assertRaisesRegex(ValidationError, "undeclared tools: create_refund"):
+            WorkflowSpec.model_validate(data)
+
     def test_workflow_cannot_list_no_resolution_as_valid(self) -> None:
         data = self.library.workflow("refund-request").model_dump(mode="json")
         data["outcomes"].append("no_resolution")

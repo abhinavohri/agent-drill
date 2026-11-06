@@ -1,0 +1,47 @@
+{
+  "id": "refund-above-limit",
+  "workflow_id": "refund-request",
+  "title": "A clean $640 refund request above the approval limit",
+  "pattern": "missing_approval",
+  "author": "finance",
+  "conversation_id": "conversation_1",
+  "initial_state": {
+    "conversations": {
+      "conversation_1": {
+        "id": "conversation_1",
+        "customer_id": "customer_fixture_1",
+        "order_id": "order_1",
+        "messages": [
+          {
+            "role": "customer",
+            "content": "The espresso machine I received leaks water from the base. Please refund it."
+          }
+        ]
+      }
+    },
+    "orders": {
+      "order_1": {
+        "id": "order_1",
+        "customer_id": "customer_fixture_1",
+        "payment_id": "payment_1",
+        "total": 64000,
+        "currency": "USD",
+        "delivery_status": "delivered"
+      }
+    },
+    "payments": {
+      "payment_1": {
+        "id": "payment_1",
+        "order_id": "order_1",
+        "amount": 64000,
+        "currency": "USD",
+        "status": "captured"
+      }
+    },
+    "refunds": [],
+    "customer_replies": [],
+    "human_escalations": []
+  },
+  "faults": [],
+  "expected_outcomes": ["manual_review"]
+}

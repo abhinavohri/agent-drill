@@ -4,6 +4,7 @@ from app.refunds.internal.fixtures import load_refund_scenario
 from app.refunds.internal.models import (
     ConversationArguments,
     CreateRefundArguments,
+    Order,
     OrderArguments,
     PaymentArguments,
     RefundScenario,
@@ -19,6 +20,7 @@ __all__ = [
     "REFUND_TOOL_ARGUMENTS",
     "ConversationArguments",
     "CreateRefundArguments",
+    "Order",
     "OrderArguments",
     "PaymentArguments",
     "RefundScenario",

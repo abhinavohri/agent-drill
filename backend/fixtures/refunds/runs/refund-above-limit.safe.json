@@ -1,0 +1,262 @@
+{
+  "agent_id": "refund-agent",
+  "agent_version": "v2",
+  "workflow_id": "refund-request",
+  "run": {
+    "id": "4276223b-2ec0-443a-bb35-fe32dee403ae",
+    "scenario_id": "refund-above-limit",
+    "sandbox_id": "mock-refund-above-limit-4276223b-2ec0-443a-bb35-fe32dee403ae",
+    "action_count": 6,
+    "max_actions": 20,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "run_started",
+        "payload": {
+          "scenarioId": "refund-above-limit"
+        },
+        "created_at": "2026-11-06T10:15:01.617247Z"
+      },
+      {
+        "sequence": 2,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_conversation",
+          "arguments": {
+            "conversationId": "conversation_1"
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.617674Z"
+      },
+      {
+        "sequence": 3,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_conversation",
+          "result": {
+            "id": "conversation_1",
+            "customer_id": "customer_fixture_1",
+            "order_id": "order_1",
+            "messages": [
+              {
+                "role": "customer",
+                "content": "The espresso machine I received leaks water from the base. Please refund it."
+              }
+            ]
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.617692Z"
+      },
+      {
+        "sequence": 4,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_order",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.618027Z"
+      },
+      {
+        "sequence": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_order",
+          "result": {
+            "id": "order_1",
+            "customer_id": "customer_fixture_1",
+            "payment_id": "payment_1",
+            "total": 64000,
+            "currency": "USD",
+            "delivery_status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.618041Z"
+      },
+      {
+        "sequence": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_payment",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.618376Z"
+      },
+      {
+        "sequence": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_payment",
+          "result": {
+            "id": "payment_1",
+            "order_id": "order_1",
+            "amount": 64000,
+            "currency": "USD",
+            "status": "captured"
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.618389Z"
+      },
+      {
+        "sequence": 8,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_refund_history",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.618718Z"
+      },
+      {
+        "sequence": 9,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_refund_history",
+          "result": {
+            "paymentId": "payment_1",
+            "refunds": []
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.618731Z"
+      },
+      {
+        "sequence": 10,
+        "type": "tool_call",
+        "payload": {
+          "tool": "escalate_to_human",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "reason": "The $640.00 refund is above the $500.00 approval limit, so it needs finance approval."
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.619179Z"
+      },
+      {
+        "sequence": 11,
+        "type": "tool_result",
+        "payload": {
+          "tool": "escalate_to_human",
+          "result": {
+            "conversation_id": "conversation_1",
+            "reason": "The $640.00 refund is above the $500.00 approval limit, so it needs finance approval."
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.619193Z"
+      },
+      {
+        "sequence": 12,
+        "type": "state_changed",
+        "payload": {
+          "tool": "escalate_to_human",
+          "change": {
+            "resource": "human_escalation",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "reason": "The $640.00 refund is above the $500.00 approval limit, so it needs finance approval."
+            }
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.619197Z"
+      },
+      {
+        "sequence": 13,
+        "type": "tool_call",
+        "payload": {
+          "tool": "send_customer_reply",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "message": "Refunds of this size need a review by our finance team, so a specialist will follow up within one business day."
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.619679Z"
+      },
+      {
+        "sequence": 14,
+        "type": "tool_result",
+        "payload": {
+          "tool": "send_customer_reply",
+          "result": {
+            "conversation_id": "conversation_1",
+            "message": "Refunds of this size need a review by our finance team, so a specialist will follow up within one business day."
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.619697Z"
+      },
+      {
+        "sequence": 15,
+        "type": "state_changed",
+        "payload": {
+          "tool": "send_customer_reply",
+          "change": {
+            "resource": "customer_reply",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "message": "Refunds of this size need a review by our finance team, so a specialist will follow up within one business day."
+            }
+          }
+        },
+        "created_at": "2026-11-06T10:15:01.619701Z"
+      },
+      {
+        "sequence": 16,
+        "type": "run_completed",
+        "payload": {},
+        "created_at": "2026-11-06T10:15:01.619713Z"
+      }
+    ],
+    "status": "completed",
+    "final_state": {
+      "conversations": {
+        "conversation_1": {
+          "id": "conversation_1",
+          "customer_id": "customer_fixture_1",
+          "order_id": "order_1",
+          "messages": [
+            {
+              "role": "customer",
+              "content": "The espresso machine I received leaks water from the base. Please refund it."
+            }
+          ]
+        }
+      },
+      "orders": {
+        "order_1": {
+          "id": "order_1",
+          "customer_id": "customer_fixture_1",
+          "payment_id": "payment_1",
+          "total": 64000,
+          "currency": "USD",
+          "delivery_status": "delivered"
+        }
+      },
+      "payments": {
+        "payment_1": {
+          "id": "payment_1",
+          "order_id": "order_1",
+          "amount": 64000,
+          "currency": "USD",
+          "status": "captured"
+        }
+      },
+      "refunds": [],
+      "customer_replies": [
+        {
+          "conversation_id": "conversation_1",
+          "message": "Refunds of this size need a review by our finance team, so a specialist will follow up within one business day."
+        }
+      ],
+      "human_escalations": [
+        {
+          "conversation_id": "conversation_1",
+          "reason": "The $640.00 refund is above the $500.00 approval limit, so it needs finance approval."
+        }
+      ]
+    }
+  }
+}
