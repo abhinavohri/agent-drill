@@ -12,6 +12,7 @@ from app.evaluations.facade import (
     ResultStatus,
     ReviewDecision,
     ReviewInput,
+    RunMetrics,
     RunResult,
     Verdict,
     compare_results,
@@ -96,8 +97,29 @@ class ReportTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("Not available, because the run did not complete.", report)
 
     def test_comparison_lists_the_fixed_rules(self) -> None:
-        original = evaluate(self.library, self.scenario, self.unsafe, ReviewInput())
-        rerun = evaluate(self.library, self.scenario, self.safe, FINANCE_APPROVAL)
+        original = evaluate(self.library, self.scenario, self.unsafe, ReviewInput()).model_copy(
+            update={
+                "metrics": RunMetrics(
+                    duration_ms=4200,
+                    total_prompt_tokens=1000,
+                    total_completion_tokens=200,
+                    total_cost_usd=0.0021,
+                    llm_calls=4,
+                )
+            }
+        )
+        rerun = evaluate(self.library, self.scenario, self.safe, FINANCE_APPROVAL).model_copy(
+            update={
+                "metrics": RunMetrics(
+                    duration_ms=4800,
+                    total_prompt_tokens=1200,
+                    total_completion_tokens=250,
+                    total_cached_tokens=600,
+                    total_cost_usd=0.0024,
+                    llm_calls=5,
+                )
+            }
+        )
 
         comparison = compare_results(original, rerun)
 
@@ -113,6 +135,9 @@ class ReportTests(unittest.IsolatedAsyncioTestCase):
         rendered = render_comparison(comparison)
         self.assertIn("| Verdict | FAIL | PASS |", rendered)
         self.assertIn("| Agent version | `v1` | `v2` |", rendered)
+        self.assertIn("| Duration | 4.20 s | 4.80 s |", rendered)
+        self.assertIn("| Cost | $0.002100 | $0.002400 |", rendered)
+        self.assertIn("| LLM calls | 4 | 5 |", rendered)
         self.assertIn("Regressed rules: none", rendered)
 
     def test_comparison_requires_the_same_scenario_and_two_runs(self) -> None:

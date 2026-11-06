@@ -17,11 +17,13 @@ from app.evaluations.facade import (
     EvaluationInputError,
     RecordedRun,
     ReviewInput,
+    RunMetrics,
     evaluate_run,
     render_run_report,
 )
 from app.refunds.facade import RefundScenario, RefundToolProvider, RefundWorld
 from app.simulations.facade import MockSandbox, RunStatus, SimulationRun, SimulationService
+from app.traces.facade import load_atif
 from app.workflows.facade import (
     LibraryError,
     Scenario,
@@ -77,7 +79,13 @@ def main(argv: list[str] | None = None) -> int:
     (output / "drill-run.json").write_text(drill.model_dump_json(indent=2, exclude_none=True) + "\n")
     (output / "recorded-run.json").write_text(recorded.model_dump_json(indent=2) + "\n")
     try:
-        result = evaluate_run(workflow, scenario, recorded, ReviewInput())
+        result = evaluate_run(
+            workflow,
+            scenario,
+            recorded,
+            ReviewInput(),
+            metrics=_run_metrics(drill),
+        )
     except EvaluationInputError as exc:
         sys.stderr.write(f"Cannot evaluate the run: {exc}\n")
         return 1
@@ -133,6 +141,28 @@ async def _finish(simulations: SimulationService, run_id: str, world: RefundWorl
 def _policy(workflow: WorkflowSpec) -> str:
     rules = "".join(f"- {rule.policy}\n" for rule in workflow.rules)
     return f"{workflow.title} policy:\n{rules}"
+
+
+def _run_metrics(drill: DrillRun) -> RunMetrics:
+    if drill.trace_path is None:
+        return RunMetrics(duration_ms=drill.duration_ms)
+    final = load_atif(drill.trace_path).final_metrics
+    if final is None:
+        return RunMetrics(duration_ms=drill.duration_ms)
+    extra = final.extra or {}
+    return RunMetrics(
+        duration_ms=drill.duration_ms,
+        total_prompt_tokens=final.total_prompt_tokens,
+        total_completion_tokens=final.total_completion_tokens,
+        total_cached_tokens=final.total_cached_tokens,
+        total_cost_usd=final.total_cost_usd,
+        total_steps=final.total_steps,
+        llm_calls=_non_negative_int(extra.get("llm_calls")),
+    )
+
+
+def _non_negative_int(value: object) -> int | None:
+    return value if type(value) is int and value >= 0 else None
 
 
 def _build_parser() -> argparse.ArgumentParser:

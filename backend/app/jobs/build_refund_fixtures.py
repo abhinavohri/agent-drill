@@ -91,7 +91,7 @@ def _review_input(root: Path, script_id: str) -> ReviewInput:
 
 
 def _json(model: BaseModel) -> str:
-    return model.model_dump_json(indent=2) + "\n"
+    return model.model_dump_json(indent=2, exclude_none=True) + "\n"
 
 
 if __name__ == "__main__":

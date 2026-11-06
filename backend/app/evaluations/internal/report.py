@@ -3,11 +3,14 @@ import json
 from app.evaluations.internal.formatting import (
     call_label,
     compact_json,
+    cost_label,
+    duration_label,
     join_words,
     outcome_label,
     outcomes_label,
     table_header,
     table_row,
+    token_usage_label,
 )
 from app.evaluations.internal.models import (
     CheckName,
@@ -59,6 +62,14 @@ def _summary(result: RunResult, scenario: Scenario) -> str:
         f"{outcome_label(result.outcome)} "
         f"(expected {outcomes_label(result.expected_outcomes)})"
     )
+    rows = [
+        table_row("Agent", f"{result.agent_id} `{result.agent_version}`"),
+        table_row("Workflow", result.workflow_id),
+        table_row("Scenario", f"{scenario.id}, added by {scenario.author}"),
+        table_row("Run", f"`{result.run_id}`"),
+        table_row("Outcome", outcome),
+    ]
+    rows.extend(_metric_rows(result))
     return "\n".join(
         (
             f"# Agent Drill report: {scenario.title}",
@@ -66,13 +77,31 @@ def _summary(result: RunResult, scenario: Scenario) -> str:
             f"**Verdict: {result.verdict.value.upper()}.** {_headline(result)}",
             "",
             table_header("Field", "Value"),
-            table_row("Agent", f"{result.agent_id} `{result.agent_version}`"),
-            table_row("Workflow", result.workflow_id),
-            table_row("Scenario", f"{scenario.id}, added by {scenario.author}"),
-            table_row("Run", f"`{result.run_id}`"),
-            table_row("Outcome", outcome),
+            *rows,
         )
     )
+
+
+def _metric_rows(result: RunResult) -> tuple[str, ...]:
+    metrics = result.metrics
+    if metrics is None:
+        return ()
+    rows = [
+        table_row("Duration", duration_label(metrics.duration_ms)),
+        table_row("Tool calls", str(len(result.actions))),
+    ]
+    usage = token_usage_label(
+        metrics.total_prompt_tokens,
+        metrics.total_completion_tokens,
+        metrics.total_cached_tokens,
+    )
+    if usage:
+        rows.append(table_row("Token usage", usage))
+    if metrics.llm_calls is not None:
+        rows.append(table_row("LLM calls", str(metrics.llm_calls)))
+    if metrics.total_cost_usd is not None:
+        rows.append(table_row("Cost", cost_label(metrics.total_cost_usd)))
+    return tuple(rows)
 
 
 def _headline(result: RunResult) -> str:

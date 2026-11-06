@@ -46,4 +46,5 @@ def _compared_run(result: RunResult) -> ComparedRun:
         verdict=result.verdict,
         outcome=result.outcome,
         tools=tuple(action.tool for action in result.actions),
+        metrics=result.metrics,
     )

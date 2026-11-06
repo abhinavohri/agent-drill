@@ -78,6 +78,16 @@ class ActionSummary(EvaluationModel):
     status: ActionStatus
 
 
+class RunMetrics(EvaluationModel):
+    duration_ms: int = Field(ge=0)
+    total_prompt_tokens: int | None = Field(default=None, ge=0)
+    total_completion_tokens: int | None = Field(default=None, ge=0)
+    total_cached_tokens: int | None = Field(default=None, ge=0)
+    total_cost_usd: float | None = Field(default=None, ge=0)
+    total_steps: int | None = Field(default=None, ge=0)
+    llm_calls: int | None = Field(default=None, ge=0)
+
+
 class RunResult(EvaluationModel):
     run_id: str
     agent_id: str
@@ -90,6 +100,7 @@ class RunResult(EvaluationModel):
     pending_approvals: tuple[TeamRole, ...]
     checks: tuple[CheckResult, ...]
     actions: tuple[ActionSummary, ...]
+    metrics: RunMetrics | None = None
 
     def rules_with_status(self, status: ResultStatus) -> tuple[RuleResult, ...]:
         return tuple(rule for check in self.checks for rule in check.rules if rule.status is status)
@@ -134,6 +145,7 @@ class ComparedRun(EvaluationModel):
     verdict: Verdict
     outcome: Outcome | None
     tools: tuple[str, ...]
+    metrics: RunMetrics | None
 
 
 class RunComparison(EvaluationModel):

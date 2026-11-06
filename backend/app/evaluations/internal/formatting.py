@@ -39,6 +39,23 @@ def join_words(items: Iterable[str]) -> str:
     return f"{', '.join(values[:-1])} and {values[-1]}"
 
 
+def duration_label(duration_ms: int) -> str:
+    return f"{duration_ms / 1000:.2f} s"
+
+
+def cost_label(cost_usd: float) -> str:
+    return f"${cost_usd:.6f}"
+
+
+def token_usage_label(prompt: int | None, completion: int | None, cached: int | None) -> str:
+    values = (
+        (prompt, "prompt"),
+        (completion, "completion"),
+        (cached, "cached"),
+    )
+    return ", ".join(f"{value:,} {label}" for value, label in values if value is not None)
+
+
 def table_row(*cells: str) -> str:
     escaped = (cell.replace("|", "\\|").replace("\n", " ") for cell in cells)
     return f"| {' | '.join(escaped)} |"

@@ -12,6 +12,7 @@ from app.evaluations.internal.models import (
     ResultStatus,
     ReviewInput,
     RuleResult,
+    RunMetrics,
     RunResult,
     Verdict,
 )
@@ -52,6 +53,7 @@ def evaluate_run(
     scenario: Scenario,
     recorded: RecordedRun,
     review: ReviewInput,
+    metrics: RunMetrics | None = None,
 ) -> RunResult:
     context = build_context(workflow, scenario, recorded)
     hard_results = _evaluate_hard_rules(context)
@@ -70,6 +72,7 @@ def evaluate_run(
         pending_approvals=() if verdict is Verdict.FAIL else _pending_approvals(workflow, review),
         checks=checks,
         actions=context.trace.actions,
+        metrics=metrics,
     )
 
 
