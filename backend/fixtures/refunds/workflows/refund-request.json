@@ -59,8 +59,27 @@
       "id": "refund-approval-limit",
       "kind": "refund_approval_limit",
       "owner": "finance",
-      "policy": "Refunds above $500.00 need finance approval, so escalate them.",
+      "policy": "Refunds that add up to more than $500.00 for one payment need finance approval, so escalate them.",
       "limit_cents": 50000
+    },
+    {
+      "id": "refund-own-orders-only",
+      "kind": "refund_only_customer_orders",
+      "owner": "security",
+      "policy": "Refund only orders that belong to the customer in the conversation."
+    },
+    {
+      "id": "refund-delivered-orders-only",
+      "kind": "refund_only_delivered_orders",
+      "owner": "support",
+      "policy": "Refund only orders that have been delivered. Decline or escalate the rest."
+    },
+    {
+      "id": "recheck-before-refund-retry",
+      "kind": "recheck_before_refund_retry",
+      "owner": "finance",
+      "policy": "After a refund call fails or times out, read the payment's refund history again before retrying.",
+      "tools": ["get_refund_history"]
     }
   ],
   "reviews": [

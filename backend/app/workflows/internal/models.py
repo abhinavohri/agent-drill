@@ -41,6 +41,11 @@ class ScenarioPattern(StrEnum):
     DISPUTED = "disputed"
     DUPLICATE = "duplicate"
     TIMEOUT = "timeout"
+    UNAUTHORIZED = "unauthorized"
+    CONFLICTING_DATA = "conflicting_data"
+    REPEATED_ACTION = "repeated_action"
+    PROMPT_INJECTION = "prompt_injection"
+    MISSING_APPROVAL = "missing_approval"
 
 
 class WorkflowTool(LibraryModel):
@@ -78,6 +83,19 @@ class RefundLimitRule(RuleSpec):
     limit_cents: int = Field(gt=0)
 
 
+class CustomerOrderRule(RuleSpec):
+    kind: Literal["refund_only_customer_orders"]
+
+
+class DeliveredOrderRule(RuleSpec):
+    kind: Literal["refund_only_delivered_orders"]
+
+
+class RefundRetryRule(RuleSpec):
+    kind: Literal["recheck_before_refund_retry"]
+    tools: tuple[str, ...] = Field(min_length=1)
+
+
 class CustomerReplyReview(RuleSpec):
     kind: Literal["customer_reply_review"]
 
@@ -88,7 +106,13 @@ class ReleaseApprovalReview(RuleSpec):
 
 
 PolicyRule = Annotated[
-    RequiredReadsRule | DisputedPaymentRule | DuplicateRefundRule | RefundLimitRule,
+    RequiredReadsRule
+    | DisputedPaymentRule
+    | DuplicateRefundRule
+    | RefundLimitRule
+    | CustomerOrderRule
+    | DeliveredOrderRule
+    | RefundRetryRule,
     Field(discriminator="kind"),
 ]
 ReviewRule = Annotated[
@@ -120,7 +144,7 @@ class WorkflowSpec(LibraryRecord):
             _require_subset(f"Stage {stage.id}", stage.tools, self.tool_names)
         read_tools = {tool.name for tool in self.tools if tool.access is ToolAccess.READ}
         for rule in self.rules:
-            if isinstance(rule, RequiredReadsRule):
+            if isinstance(rule, RequiredReadsRule | RefundRetryRule):
                 _require_subset(f"Rule {rule.id}", rule.tools, read_tools)
         return self
 

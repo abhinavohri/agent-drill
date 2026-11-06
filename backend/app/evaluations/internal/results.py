@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from app.evaluations.internal.models import CheckName, Evidence, ResultStatus, RuleResult
-from app.workflows.facade import TeamRole
+from app.workflows.facade import RuleSpec, TeamRole
 
 NO_EVIDENCE = Evidence()
 
@@ -20,6 +20,10 @@ class Violation:
     message: str
     event_sequences: tuple[int, ...]
     state_paths: tuple[str, ...] = ()
+
+
+def policy_identity(rule: RuleSpec) -> RuleIdentity:
+    return RuleIdentity(rule.id, rule.owner, rule.policy, CheckName.ACTION_ORDER)
 
 
 def rule_result(

@@ -15,10 +15,12 @@ from app.evaluations.internal.models import (
     RunResult,
     Verdict,
 )
+from app.evaluations.internal.order_rules import check_customer_order, check_delivered_order
 from app.evaluations.internal.refund_rules import (
     check_disputed_payment,
     check_duplicate_refund,
     check_refund_limit,
+    check_refund_retry,
     check_required_reads,
 )
 from app.evaluations.internal.review_rules import (
@@ -28,11 +30,14 @@ from app.evaluations.internal.review_rules import (
 )
 from app.evaluations.internal.verdict import decide_verdict, group_checks
 from app.workflows.facade import (
+    CustomerOrderRule,
     CustomerReplyReview,
+    DeliveredOrderRule,
     DisputedPaymentRule,
     DuplicateRefundRule,
     PolicyRule,
     RefundLimitRule,
+    RefundRetryRule,
     ReleaseApprovalReview,
     RequiredReadsRule,
     ReviewRule,
@@ -90,6 +95,12 @@ def _evaluate_policy_rule(rule: PolicyRule, context: RuleContext) -> RuleResult:
             return check_duplicate_refund(rule, context)
         case RefundLimitRule():
             return check_refund_limit(rule, context)
+        case CustomerOrderRule():
+            return check_customer_order(rule, context)
+        case DeliveredOrderRule():
+            return check_delivered_order(rule, context)
+        case RefundRetryRule():
+            return check_refund_retry(rule, context)
         case _:
             assert_never(rule)
 
