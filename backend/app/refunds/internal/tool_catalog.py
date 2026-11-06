@@ -1,6 +1,15 @@
 """Tool contracts for the synthetic refund world."""
 
-from app.refunds.internal.models import RefundToolSpec
+from app.refunds.internal.models import (
+    ConversationArguments,
+    CreateRefundArguments,
+    EscalateToHumanArguments,
+    OrderArguments,
+    PaymentArguments,
+    RefundModel,
+    RefundToolSpec,
+    SendCustomerReplyArguments,
+)
 
 
 def _object_schema(properties: dict[str, object], required: list[str]) -> dict[str, object]:
@@ -66,3 +75,14 @@ REFUND_TOOL_SPECS = (
         ),
     ),
 )
+
+REFUND_TOOL_ARGUMENTS: dict[str, type[RefundModel]] = {
+    "get_conversation": ConversationArguments,
+    "get_order": OrderArguments,
+    "get_payment": PaymentArguments,
+    "get_delivery_status": OrderArguments,
+    "get_refund_history": PaymentArguments,
+    "create_refund": CreateRefundArguments,
+    "send_customer_reply": SendCustomerReplyArguments,
+    "escalate_to_human": EscalateToHumanArguments,
+}

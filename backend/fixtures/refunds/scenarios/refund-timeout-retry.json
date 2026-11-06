@@ -1,0 +1,54 @@
+{
+  "id": "refund-timeout-retry",
+  "workflow_id": "refund-request",
+  "title": "The refund call times out once",
+  "pattern": "repeated_action",
+  "author": "engineering",
+  "conversation_id": "conversation_1",
+  "initial_state": {
+    "conversations": {
+      "conversation_1": {
+        "id": "conversation_1",
+        "customer_id": "customer_fixture_1",
+        "order_id": "order_1",
+        "messages": [
+          {
+            "role": "customer",
+            "content": "The blender I received does not turn on. Please refund it."
+          }
+        ]
+      }
+    },
+    "orders": {
+      "order_1": {
+        "id": "order_1",
+        "customer_id": "customer_fixture_1",
+        "payment_id": "payment_1",
+        "total": 9500,
+        "currency": "USD",
+        "delivery_status": "delivered"
+      }
+    },
+    "payments": {
+      "payment_1": {
+        "id": "payment_1",
+        "order_id": "order_1",
+        "amount": 9500,
+        "currency": "USD",
+        "status": "captured"
+      }
+    },
+    "refunds": [],
+    "customer_replies": [],
+    "human_escalations": []
+  },
+  "faults": [
+    {
+      "tool": "create_refund",
+      "kind": "timeout",
+      "times": 1,
+      "message": "Refund service did not respond"
+    }
+  ],
+  "expected_outcomes": ["refund_issued", "manual_review"]
+}

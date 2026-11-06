@@ -3,9 +3,10 @@
 Run these commands from `backend/`:
 
 ```sh
-.venv/bin/ruff check app tests
-.venv/bin/python -m unittest discover -s tests -p 'test_*.py'
+uv run ruff check app tests
+uv run python -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Also import `app.main` and `app.jobs.drill_mcp` after a structural change.
+Also import `app.main`, `app.jobs.drill_mcp`, `app.jobs.evaluate_run`, and `app.jobs.build_refund_fixtures` after a structural change.
 
+After a change to the evaluator, the refund world, a scenario, or an agent script, run `uv run python -m app.jobs.build_refund_fixtures` and commit the regenerated runs, results, and reports. A test fails when they are stale.
