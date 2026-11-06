@@ -6,3 +6,12 @@ See [backend/README.md](backend/README.md) for setup and commands.
 
 Use [docs/switch-telegram.md](docs/switch-telegram.md) to connect the project agent to Telegram through Switch.
 
+## Preview the landing page
+
+```sh
+cd website
+python3 -m http.server 4173
+```
+
+Open <http://localhost:4173>.
+

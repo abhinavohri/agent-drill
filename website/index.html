@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Agent Drill tests real agent code in safe, stateful environments before release." />
+    <title>Agent Drill — Test agents before release</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23f2b84b' stroke-width='4'/%3E%3Cpath d='M7 25 25 7' stroke='%23f2b84b' stroke-width='4'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Agent Drill home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Agent Drill
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#workflow">How it works</a>
+        <a href="#evidence">Evidence</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a class="header-link" href="https://github.com/abhinavohri/agent-drill">View GitHub</a>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="eyebrow"><span>01</span> Pre-release agent testing</div>
+        <h1 id="hero-title">Break your agent before production does.</h1>
+        <p class="hero-copy">Run real agent code against safe, stateful test environments. Inspect every tool call. Compare the result after each change.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#workflow">See how a drill runs</a>
+          <a class="button secondary" href="#evidence">Inspect the evidence</a>
+        </div>
+
+        <div class="run-window" aria-label="Illustrative agent test result">
+          <div class="window-bar">
+            <div class="window-title"><span class="live-dot"></span> Run 042 · Refund above limit</div>
+            <span class="sample-label">Illustrative run</span>
+          </div>
+          <div class="run-layout">
+            <aside class="run-list" aria-label="Run stages">
+              <p class="panel-label">Drill stages</p>
+              <ol>
+                <li class="done"><span>01</span> Trace loaded</li>
+                <li class="done"><span>02</span> World reset</li>
+                <li class="active"><span>03</span> Agent run</li>
+                <li><span>04</span> Rules checked</li>
+              </ol>
+            </aside>
+            <div class="run-detail">
+              <div class="compare-tabs" role="tablist" aria-label="Run comparison">
+                <button id="baseline-tab" class="tab active" role="tab" aria-selected="true" aria-controls="run-panel" data-run="baseline">Baseline <span class="fail-text">Fail</span></button>
+                <button id="corrected-tab" class="tab" role="tab" aria-selected="false" aria-controls="run-panel" data-run="corrected">Corrected <span class="pass-text">Pass</span></button>
+              </div>
+              <div id="run-panel" class="result-card" role="tabpanel" aria-live="polite">
+                <div class="result-heading">
+                  <div>
+                    <p class="panel-label">Policy result</p>
+                    <h2 id="result-title">Human approval was missing</h2>
+                  </div>
+                  <span id="result-badge" class="result-badge fail">Failed</span>
+                </div>
+                <div class="trace-row">
+                  <span class="trace-time">12:04.118</span>
+                  <span class="trace-tool">create_refund</span>
+                  <span id="trace-outcome" class="trace-outcome fail-text">blocked · $750.00</span>
+                </div>
+                <p id="result-copy" class="result-copy">The agent tried to issue a refund above the configured limit. The synthetic world rejected the action and kept the payment unchanged.</p>
+                <div class="facts">
+                  <div><span>Tool calls</span><strong id="tool-count">6</strong></div>
+                  <div><span>Rules checked</span><strong>8</strong></div>
+                  <div><span>State changes</span><strong id="state-count">0</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow" class="section workflow live-story" aria-labelledby="workflow-title">
+        <div class="section-heading">
+          <div class="eyebrow"><span>02</span> Follow one drill</div>
+          <h2 id="workflow-title">Watch the test environment come alive.</h2>
+          <p>This illustrative run starts with a production trace. Scroll through the run to see how Agent Drill builds the environment, starts the real agent, and checks the result.</p>
+        </div>
+        <div class="story-grid">
+          <ol class="story-steps" aria-label="Drill run stages">
+            <li class="story-step active" data-story-stage="0"><span>01</span><div><h3>Load the evidence</h3><p>An ATIF trace becomes a normalized run record. The scenario keeps only the state that the test needs.</p></div></li>
+            <li class="story-step" data-story-stage="1"><span>02</span><div><h3>Reset the world</h3><p>A clean synthetic environment starts with the disputed payment and the approval policy.</p></div></li>
+            <li class="story-step" data-story-stage="2"><span>03</span><div><h3>Start the agent</h3><p>The configured command runs the real agent. Each tool request changes only the synthetic world.</p></div></li>
+            <li class="story-step" data-story-stage="3"><span>04</span><div><h3>Check the outcome</h3><p>The evaluator connects the failed rule to the exact tool call and the unchanged final state.</p></div></li>
+          </ol>
+
+          <div class="story-stage">
+            <div id="live-drill" class="live-drill" data-stage="0" aria-live="polite">
+              <div class="live-header"><span><i></i> Run 043 · baseline</span><strong id="live-status">Trace loaded</strong></div>
+              <div class="pipeline" aria-label="Run pipeline">
+                <div class="pipe-node active"><b>01</b><span>Input</span></div><i class="pipe-link"></i>
+                <div class="pipe-node"><b>02</b><span>World</span></div><i class="pipe-link"></i>
+                <div class="pipe-node"><b>03</b><span>Agent</span></div><i class="pipe-link"></i>
+                <div class="pipe-node"><b>04</b><span>Check</span></div>
+              </div>
+              <div class="live-feed">
+                <p class="panel-label">Live evidence</p>
+                <div class="feed-line visible" data-feed-stage="0"><span>00:00.000</span><b>trace.ingest</b><em>ATIF 1.7 · 14 events</em></div>
+                <div class="feed-line" data-feed-stage="1"><span>00:00.083</span><b>world.reset</b><em>payment disputed</em></div>
+                <div class="feed-line" data-feed-stage="2"><span>00:01.241</span><b>create_refund</b><em class="fail-text">blocked · $750.00</em></div>
+                <div class="feed-line" data-feed-stage="3"><span>00:01.266</span><b>rule.approval</b><em class="fail-text">failed</em></div>
+              </div>
+              <div class="live-outcome"><span>Final state</span><strong id="live-outcome">Waiting for run</strong></div>
+              <p class="sample-note">Illustrative run. No production system is changed.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="evidence" class="section evidence" aria-labelledby="evidence-title">
+        <div class="evidence-copy">
+          <div class="eyebrow"><span>03</span> Evidence, not a score alone</div>
+          <h2 id="evidence-title">See the action that caused the result.</h2>
+          <p>Each report connects the verdict to the trace and the final synthetic state. A reviewer can see what failed, why it failed, and what changed in the next run.</p>
+          <ul class="check-list">
+            <li>Tool calls and arguments</li>
+            <li>State before and after the run</li>
+            <li>Failed rules with trace evidence</li>
+            <li>Baseline and corrected run comparison</li>
+          </ul>
+        </div>
+        <div class="report-card" aria-label="Example evaluation report">
+          <div class="report-top"><span>evaluation.md</span><span class="report-status">PASS</span></div>
+          <div class="report-body">
+            <p class="code-comment"># Run comparison</p>
+            <p><span class="code-key">scenario</span>: refund-above-limit</p>
+            <p><span class="code-key">baseline</span>: <span class="fail-text">FAIL</span></p>
+            <p><span class="code-key">corrected</span>: <span class="pass-text">PASS</span></p>
+            <div class="code-rule"></div>
+            <p class="code-comment">Rule 4 · approval required</p>
+            <p><span class="minus">−</span> refund before approval</p>
+            <p><span class="plus">+</span> finance approval recorded</p>
+            <p><span class="plus">+</span> refund completed</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section agnostic" aria-labelledby="agnostic-title">
+        <div><div class="eyebrow"><span>04</span> Agent agnostic</div><h2 id="agnostic-title">Connect a command. Keep your agent.</h2></div>
+        <p>Agent Drill does not require one agent framework. The target command can use Codex, Claude Code, a local model, or another runtime. It only needs to write a supported trace artifact.</p>
+      </section>
+
+      <section id="faq" class="section faq" aria-labelledby="faq-title">
+        <div class="eyebrow"><span>05</span> FAQ</div>
+        <h2 id="faq-title">The short answers.</h2>
+        <details><summary>Does Agent Drill call production tools?</summary><p>No. A drill uses a synthetic environment. The target agent code is real, but the test tools and state are controlled.</p></details>
+        <details><summary>Does it work with one agent framework?</summary><p>No. The current command connector starts any configured process that writes an ATIF trace.</p></details>
+        <details><summary>What exists today?</summary><p>The repository includes ATIF ingestion, a command runner, stateful scenarios, deterministic checks, run comparison, and Markdown reports.</p></details>
+      </section>
+    </main>
+
+    <footer><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Agent Drill</a><p>Test the behavior. Keep the evidence.</p><a href="https://github.com/abhinavohri/agent-drill">GitHub</a></footer>
+  </body>
+</html>
