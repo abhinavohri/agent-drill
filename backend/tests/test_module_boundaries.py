@@ -2,8 +2,16 @@ import ast
 import unittest
 from pathlib import Path
 
-DOMAINS = {"drill_mcp", "evaluations", "refunds", "simulations", "traces", "workflows"}
-OFFLINE_DOMAINS = ("evaluations", "refunds", "traces", "workflows")
+DOMAINS = {
+    "drill_mcp",
+    "drills",
+    "evaluations",
+    "refunds",
+    "simulations",
+    "traces",
+    "workflows",
+}
+OFFLINE_DOMAINS = ("drills", "evaluations", "refunds", "traces", "workflows")
 APP_ROOT = Path(__file__).parents[1] / "app"
 MAX_SOURCE_LINES = 250
 MAX_TEST_LINES = 350

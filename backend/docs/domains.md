@@ -1,5 +1,12 @@
 # Domain packages
 
+## Drills
+
+`app/drills/` owns target-runner contracts, command execution, time limits, and target run results.
+It validates the ATIF artifact through the `traces` facade. It contains no target-specific logic.
+
+Its facade exports the runner contract, command runner, configuration, and run result.
+
 ## Drill MCP
 
 `app/drill_mcp/` owns generic tool discovery, tool-call validation, proxying, timeout handling, and MCP protocol translation.

@@ -1,0 +1,1 @@
+"""Private drill execution implementation."""

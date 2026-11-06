@@ -19,3 +19,6 @@ The files in `fixtures/stubs/` are temporary handoff records. Shared contracts r
 External agent trajectories use the published ATIF `Trajectory` model. The trace boundary accepts
 ATIF v1.7 and rejects other versions before application code uses the trajectory.
 
+`CommandRunnerConfig` defines one command runner. `DrillRun` records the command outcome and the
+validated ATIF artifact metadata. Failed and timed-out states require an error.
+

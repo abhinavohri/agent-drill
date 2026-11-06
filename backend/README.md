@@ -38,6 +38,33 @@ uv run python -m app.jobs.ingest_trace \
 The command validates one ATIF v1.7 trajectory and writes normalized JSON to standard output. Use
 `--output PATH` to write the normalized trajectory to a file.
 
+## Run a target command
+
+Create a JSON configuration:
+
+```json
+{
+  "kind": "command",
+  "command": ["python", "-m", "target_agent", "--scenario", "{scenario_id}"],
+  "working_directory": "/path/to/target",
+  "inherit_environment": ["PATH"],
+  "environment": {},
+  "timeout_seconds": 600,
+  "trace_path": "runs/{scenario_id}/trajectory.json"
+}
+```
+
+Run one scenario:
+
+```sh
+uv run python -m app.jobs.run_drill drill.json scenario-1
+```
+
+The target command must write an ATIF v1.7 trajectory to `trace_path`. Agent Drill returns a typed
+result with the execution status, duration, output, and trace metadata. Do not put secrets in the
+configuration. The target command inherits only the environment variables named in
+`inherit_environment`.
+
 ## Evaluate a saved run
 
 ```sh
