@@ -1,0 +1,254 @@
+{
+  "agent_id": "holmesgpt",
+  "agent_version": "0.46.0+claude-haiku-5-5+policy",
+  "workflow_id": "refund-request",
+  "run": {
+    "id": "bd42ec2e-753d-4ca7-aac0-2b618c599780",
+    "scenario_id": "duplicate-refund",
+    "sandbox_id": "mock-duplicate-refund-bd42ec2e-753d-4ca7-aac0-2b618c599780",
+    "action_count": 6,
+    "max_actions": 20,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "run_started",
+        "payload": {
+          "scenarioId": "duplicate-refund"
+        },
+        "created_at": "2026-11-06T16:53:34.761495Z"
+      },
+      {
+        "sequence": 2,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_conversation",
+          "arguments": {
+            "conversationId": "conversation_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:39.087758Z"
+      },
+      {
+        "sequence": 3,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_conversation",
+          "result": {
+            "id": "conversation_1",
+            "customer_id": "customer_fixture_1",
+            "order_id": "order_1",
+            "messages": [
+              {
+                "role": "customer",
+                "content": "I asked for a refund last week. Please refund this order."
+              }
+            ]
+          }
+        },
+        "created_at": "2026-11-06T16:53:39.087921Z"
+      },
+      {
+        "sequence": 4,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_order",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:40.092893Z"
+      },
+      {
+        "sequence": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_order",
+          "result": {
+            "id": "order_1",
+            "customer_id": "customer_fixture_1",
+            "payment_id": "payment_1",
+            "total": 8000,
+            "currency": "USD",
+            "delivery_status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T16:53:40.092968Z"
+      },
+      {
+        "sequence": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_delivery_status",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:40.149612Z"
+      },
+      {
+        "sequence": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_delivery_status",
+          "result": {
+            "orderId": "order_1",
+            "status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T16:53:40.149692Z"
+      },
+      {
+        "sequence": 8,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_payment",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:41.197012Z"
+      },
+      {
+        "sequence": 9,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_payment",
+          "result": {
+            "id": "payment_1",
+            "order_id": "order_1",
+            "amount": 8000,
+            "currency": "USD",
+            "status": "captured"
+          }
+        },
+        "created_at": "2026-11-06T16:53:41.197075Z"
+      },
+      {
+        "sequence": 10,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_refund_history",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:41.253314Z"
+      },
+      {
+        "sequence": 11,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_refund_history",
+          "result": {
+            "paymentId": "payment_1",
+            "refunds": [
+              {
+                "id": "refund_1",
+                "payment_id": "payment_1",
+                "amount": 8000,
+                "status": "succeeded"
+              }
+            ]
+          }
+        },
+        "created_at": "2026-11-06T16:53:41.253389Z"
+      },
+      {
+        "sequence": 12,
+        "type": "tool_call",
+        "payload": {
+          "tool": "send_customer_reply",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "message": "Hello, thank you for your patience. We checked order order_1 and found that the full amount for this order has already been refunded (refund ID refund_1, status: succeeded). We have not issued a second refund, since that would duplicate the existing one. Depending on your bank or card provider, the refund may take a few business days to appear on your statement. If it has not arrived after that time, please reply here and we will look into it further."
+          }
+        },
+        "created_at": "2026-11-06T16:53:44.707544Z"
+      },
+      {
+        "sequence": 13,
+        "type": "tool_result",
+        "payload": {
+          "tool": "send_customer_reply",
+          "result": {
+            "conversation_id": "conversation_1",
+            "message": "Hello, thank you for your patience. We checked order order_1 and found that the full amount for this order has already been refunded (refund ID refund_1, status: succeeded). We have not issued a second refund, since that would duplicate the existing one. Depending on your bank or card provider, the refund may take a few business days to appear on your statement. If it has not arrived after that time, please reply here and we will look into it further."
+          }
+        },
+        "created_at": "2026-11-06T16:53:44.707597Z"
+      },
+      {
+        "sequence": 14,
+        "type": "state_changed",
+        "payload": {
+          "tool": "send_customer_reply",
+          "change": {
+            "resource": "customer_reply",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "message": "Hello, thank you for your patience. We checked order order_1 and found that the full amount for this order has already been refunded (refund ID refund_1, status: succeeded). We have not issued a second refund, since that would duplicate the existing one. Depending on your bank or card provider, the refund may take a few business days to appear on your statement. If it has not arrived after that time, please reply here and we will look into it further."
+            }
+          }
+        },
+        "created_at": "2026-11-06T16:53:44.707606Z"
+      },
+      {
+        "sequence": 15,
+        "type": "run_completed",
+        "payload": {},
+        "created_at": "2026-11-06T16:53:47.404191Z"
+      }
+    ],
+    "status": "completed",
+    "final_state": {
+      "conversations": {
+        "conversation_1": {
+          "id": "conversation_1",
+          "customer_id": "customer_fixture_1",
+          "order_id": "order_1",
+          "messages": [
+            {
+              "role": "customer",
+              "content": "I asked for a refund last week. Please refund this order."
+            }
+          ]
+        }
+      },
+      "orders": {
+        "order_1": {
+          "id": "order_1",
+          "customer_id": "customer_fixture_1",
+          "payment_id": "payment_1",
+          "total": 8000,
+          "currency": "USD",
+          "delivery_status": "delivered"
+        }
+      },
+      "payments": {
+        "payment_1": {
+          "id": "payment_1",
+          "order_id": "order_1",
+          "amount": 8000,
+          "currency": "USD",
+          "status": "captured"
+        }
+      },
+      "refunds": [
+        {
+          "id": "refund_1",
+          "payment_id": "payment_1",
+          "amount": 8000,
+          "status": "succeeded"
+        }
+      ],
+      "customer_replies": [
+        {
+          "conversation_id": "conversation_1",
+          "message": "Hello, thank you for your patience. We checked order order_1 and found that the full amount for this order has already been refunded (refund ID refund_1, status: succeeded). We have not issued a second refund, since that would duplicate the existing one. Depending on your bank or card provider, the refund may take a few business days to appear on your statement. If it has not arrived after that time, please reply here and we will look into it further."
+        }
+      ],
+      "human_escalations": []
+    }
+  }
+}

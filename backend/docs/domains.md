@@ -11,7 +11,7 @@ Its facade exports the runner contract, command runner, configuration, and run r
 
 `app/drill_mcp/` owns generic tool discovery, tool-call validation, proxying, timeout handling, and MCP protocol translation.
 
-Its facade exports the proxy service, provider contract, mock provider, and stdio server operation.
+Its facade exports the proxy service, provider contract, mock provider, and the stdio and streamable HTTP server operations. The HTTP server records every session into one run, so a target can open a new MCP session for each tool call.
 
 ## Simulations
 

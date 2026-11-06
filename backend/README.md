@@ -65,6 +65,29 @@ result with the execution status, duration, output, and trace metadata. Do not p
 configuration. The target command inherits only the environment variables named in
 `inherit_environment`.
 
+## Drill a target agent on a refund scenario
+
+```sh
+uv run python -m app.jobs.run_refund_drill ../targets/holmesgpt/drill.json valid-refund \
+  --output ../targets/holmesgpt/runs/no-policy/valid-refund/r1
+```
+
+The job loads the scenario from `fixtures/refunds/` and serves its eight refund tools over MCP
+streamable HTTP on a local port. It then runs the target command from the configuration. All MCP
+sessions share one refund world and one recorded run, so a target can open a new session for each
+tool call.
+
+Besides `{scenario_id}`, the command and `trace_path` can use these placeholders:
+
+- `{mcp_url}`: the Drill MCP URL
+- `{conversation_id}`: the scenario's support conversation
+- `{output_dir}`: the output directory
+- `{policy_file}`: the workflow rules in plain language, written to `policy.md`
+
+When the target exits, the job writes `drill-run.json`, `recorded-run.json`, `result.json`, and
+`report.md` to the output directory. It takes the agent name and version from the target's ATIF
+trace. If the target fails, the job still records and grades the run, and it exits with code 1.
+
 ## Evaluate a saved run
 
 ```sh

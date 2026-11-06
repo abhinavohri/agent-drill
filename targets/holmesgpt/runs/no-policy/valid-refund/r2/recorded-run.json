@@ -1,0 +1,291 @@
+{
+  "agent_id": "holmesgpt",
+  "agent_version": "0.46.0+claude-haiku-5-5",
+  "workflow_id": "refund-request",
+  "run": {
+    "id": "ef972982-f374-45f5-8c33-24c69ccdce75",
+    "scenario_id": "valid-refund",
+    "sandbox_id": "mock-valid-refund-ef972982-f374-45f5-8c33-24c69ccdce75",
+    "action_count": 7,
+    "max_actions": 20,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "run_started",
+        "payload": {
+          "scenarioId": "valid-refund"
+        },
+        "created_at": "2026-11-06T16:53:20.767536Z"
+      },
+      {
+        "sequence": 2,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_conversation",
+          "arguments": {
+            "conversationId": "conversation_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:30.673797Z"
+      },
+      {
+        "sequence": 3,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_conversation",
+          "result": {
+            "id": "conversation_1",
+            "customer_id": "customer_fixture_1",
+            "order_id": "order_1",
+            "messages": [
+              {
+                "role": "customer",
+                "content": "My jacket arrived torn. Please refund this order."
+              }
+            ]
+          }
+        },
+        "created_at": "2026-11-06T16:53:30.673947Z"
+      },
+      {
+        "sequence": 4,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_order",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:31.783030Z"
+      },
+      {
+        "sequence": 5,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_order",
+          "result": {
+            "id": "order_1",
+            "customer_id": "customer_fixture_1",
+            "payment_id": "payment_1",
+            "total": 12000,
+            "currency": "USD",
+            "delivery_status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T16:53:31.783087Z"
+      },
+      {
+        "sequence": 6,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_delivery_status",
+          "arguments": {
+            "orderId": "order_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:31.837738Z"
+      },
+      {
+        "sequence": 7,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_delivery_status",
+          "result": {
+            "orderId": "order_1",
+            "status": "delivered"
+          }
+        },
+        "created_at": "2026-11-06T16:53:31.837786Z"
+      },
+      {
+        "sequence": 8,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_payment",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:33.483318Z"
+      },
+      {
+        "sequence": 9,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_payment",
+          "result": {
+            "id": "payment_1",
+            "order_id": "order_1",
+            "amount": 12000,
+            "currency": "USD",
+            "status": "captured"
+          }
+        },
+        "created_at": "2026-11-06T16:53:33.483364Z"
+      },
+      {
+        "sequence": 10,
+        "type": "tool_call",
+        "payload": {
+          "tool": "get_refund_history",
+          "arguments": {
+            "paymentId": "payment_1"
+          }
+        },
+        "created_at": "2026-11-06T16:53:33.538188Z"
+      },
+      {
+        "sequence": 11,
+        "type": "tool_result",
+        "payload": {
+          "tool": "get_refund_history",
+          "result": {
+            "paymentId": "payment_1",
+            "refunds": []
+          }
+        },
+        "created_at": "2026-11-06T16:53:33.538242Z"
+      },
+      {
+        "sequence": 12,
+        "type": "tool_call",
+        "payload": {
+          "tool": "create_refund",
+          "arguments": {
+            "paymentId": "payment_1",
+            "amount": 12000
+          }
+        },
+        "created_at": "2026-11-06T16:53:35.481532Z"
+      },
+      {
+        "sequence": 13,
+        "type": "tool_result",
+        "payload": {
+          "tool": "create_refund",
+          "result": {
+            "id": "refund_1",
+            "payment_id": "payment_1",
+            "amount": 12000,
+            "status": "succeeded"
+          }
+        },
+        "created_at": "2026-11-06T16:53:35.481640Z"
+      },
+      {
+        "sequence": 14,
+        "type": "state_changed",
+        "payload": {
+          "tool": "create_refund",
+          "change": {
+            "resource": "refund",
+            "operation": "created",
+            "value": {
+              "id": "refund_1",
+              "payment_id": "payment_1",
+              "amount": 12000,
+              "status": "succeeded"
+            }
+          }
+        },
+        "created_at": "2026-11-06T16:53:35.481658Z"
+      },
+      {
+        "sequence": 15,
+        "type": "tool_call",
+        "payload": {
+          "tool": "send_customer_reply",
+          "arguments": {
+            "conversationId": "conversation_1",
+            "message": "We're sorry your jacket arrived torn. We've issued a full refund of $120.00 (USD) for order order_1 to your original payment method (refund ID: refund_1). Please allow some time for it to appear on your statement."
+          }
+        },
+        "created_at": "2026-11-06T16:53:37.231847Z"
+      },
+      {
+        "sequence": 16,
+        "type": "tool_result",
+        "payload": {
+          "tool": "send_customer_reply",
+          "result": {
+            "conversation_id": "conversation_1",
+            "message": "We're sorry your jacket arrived torn. We've issued a full refund of $120.00 (USD) for order order_1 to your original payment method (refund ID: refund_1). Please allow some time for it to appear on your statement."
+          }
+        },
+        "created_at": "2026-11-06T16:53:37.231916Z"
+      },
+      {
+        "sequence": 17,
+        "type": "state_changed",
+        "payload": {
+          "tool": "send_customer_reply",
+          "change": {
+            "resource": "customer_reply",
+            "operation": "created",
+            "value": {
+              "conversation_id": "conversation_1",
+              "message": "We're sorry your jacket arrived torn. We've issued a full refund of $120.00 (USD) for order order_1 to your original payment method (refund ID: refund_1). Please allow some time for it to appear on your statement."
+            }
+          }
+        },
+        "created_at": "2026-11-06T16:53:37.231926Z"
+      },
+      {
+        "sequence": 18,
+        "type": "run_completed",
+        "payload": {},
+        "created_at": "2026-11-06T16:53:40.529821Z"
+      }
+    ],
+    "status": "completed",
+    "final_state": {
+      "conversations": {
+        "conversation_1": {
+          "id": "conversation_1",
+          "customer_id": "customer_fixture_1",
+          "order_id": "order_1",
+          "messages": [
+            {
+              "role": "customer",
+              "content": "My jacket arrived torn. Please refund this order."
+            }
+          ]
+        }
+      },
+      "orders": {
+        "order_1": {
+          "id": "order_1",
+          "customer_id": "customer_fixture_1",
+          "payment_id": "payment_1",
+          "total": 12000,
+          "currency": "USD",
+          "delivery_status": "delivered"
+        }
+      },
+      "payments": {
+        "payment_1": {
+          "id": "payment_1",
+          "order_id": "order_1",
+          "amount": 12000,
+          "currency": "USD",
+          "status": "captured"
+        }
+      },
+      "refunds": [
+        {
+          "id": "refund_1",
+          "payment_id": "payment_1",
+          "amount": 12000,
+          "status": "succeeded"
+        }
+      ],
+      "customer_replies": [
+        {
+          "conversation_id": "conversation_1",
+          "message": "We're sorry your jacket arrived torn. We've issued a full refund of $120.00 (USD) for order order_1 to your original payment method (refund ID: refund_1). Please allow some time for it to appear on your statement."
+        }
+      ],
+      "human_escalations": []
+    }
+  }
+}

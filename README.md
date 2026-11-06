@@ -4,6 +4,10 @@ Agent Drill runs real agent tool code against safe test environments. The backen
 
 See [backend/README.md](backend/README.md) for setup and commands.
 
+`targets/` holds adapters that run third-party agents as drill targets.
+[targets/holmesgpt](targets/holmesgpt/README.md) drills HolmesGPT on the refund scenarios and
+keeps its ATIF traces.
+
 Use [docs/switch-telegram.md](docs/switch-telegram.md) to connect the project agent to Telegram through Switch.
 
 ## Preview the landing page
