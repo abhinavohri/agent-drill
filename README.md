@@ -4,3 +4,5 @@ Agent Drill runs real agent tool code against safe test environments. The backen
 
 See [backend/README.md](backend/README.md) for setup and commands.
 
+Use [docs/switch-telegram.md](docs/switch-telegram.md) to connect the project agent to Telegram through Switch.
+
