@@ -1,6 +1,11 @@
 """Public interface for target-independent drill execution."""
 
-from app.drills.internal.models import CommandRunnerConfig, DrillRun, DrillRunStatus
+from app.drills.internal.models import (
+    CommandRunnerConfig,
+    DrillRun,
+    DrillRunStatus,
+    TargetRunContext,
+)
 from app.drills.internal.runner import (
     CommandDrillRunner,
     DrillConfigError,
@@ -15,5 +20,6 @@ __all__ = [
     "DrillRun",
     "DrillRunner",
     "DrillRunStatus",
+    "TargetRunContext",
     "load_command_config",
 ]

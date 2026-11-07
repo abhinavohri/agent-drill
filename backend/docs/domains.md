@@ -5,7 +5,7 @@
 `app/drills/` owns target-runner contracts, command execution, time limits, and target run results.
 It validates the ATIF artifact through the `traces` facade. It contains no target-specific logic.
 
-Its facade exports the runner contract, command runner, configuration, and run result.
+Its facade exports the runner contract, command runner, configuration, target run context, and run result.
 
 ## Drill MCP
 

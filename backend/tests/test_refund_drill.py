@@ -32,7 +32,9 @@ async def call(name, arguments):
 
 
 async def main():
-    await call("get_conversation", {"conversationId": sys.argv[2]})
+    if "conversation_1" not in sys.argv[2]:
+        raise ValueError("The target did not receive the scenario task")
+    await call("get_conversation", {"conversationId": "conversation_1"})
     await call("get_refund_history", {"paymentId": "payment_1"})
 
 
@@ -48,9 +50,9 @@ class RefundDrillJobTests(unittest.TestCase):
             "-c",
             MCP_TARGET,
             "{mcp_url}",
-            "{conversation_id}",
+            "{task}",
             str(TRACE_FIXTURE),
-            "{output_dir}/trajectory.json",
+            "{trace_path}",
         ]
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "run"
@@ -119,7 +121,7 @@ class RefundDrillJobTests(unittest.TestCase):
                     "inherit_environment": ["PATH"],
                     "environment": {},
                     "timeout_seconds": 60,
-                    "trace_path": "{output_dir}/trajectory.json",
+                    "trace_path": "trajectory.json",
                 }
             )
         )

@@ -7,6 +7,7 @@ Use this page as the backend documentation index.
 - [External providers](providers.md) defines tool-provider and sandbox boundaries.
 - [Data models](data-models.md) defines model ownership.
 - [Quality checks](quality-checks.md) defines required checks.
+- [Target command adapter contract](target-adapter.md) defines how Agent Drill starts any target agent.
 
 The source rules are in [AGENTS.md](../AGENTS.md).
 Application module rules are in [app/AGENTS.md](../app/AGENTS.md).

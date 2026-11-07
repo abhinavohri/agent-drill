@@ -45,7 +45,7 @@ Create a JSON configuration:
 ```json
 {
   "kind": "command",
-  "command": ["python", "-m", "target_agent", "--scenario", "{scenario_id}"],
+  "command": ["python", "-m", "target_agent", "--task", "{task}", "--trace", "{trace_path}"],
   "working_directory": "/path/to/target",
   "inherit_environment": ["PATH"],
   "environment": {},
@@ -57,7 +57,7 @@ Create a JSON configuration:
 Run one scenario:
 
 ```sh
-uv run python -m app.jobs.run_drill drill.json scenario-1
+uv run python -m app.jobs.run_drill drill.json scenario-1 --task "Resolve the request."
 ```
 
 The target command must write an ATIF v1.7 trajectory to `trace_path`. Agent Drill returns a typed
@@ -77,12 +77,8 @@ streamable HTTP on a local port. It then runs the target command from the config
 sessions share one refund world and one recorded run, so a target can open a new session for each
 tool call.
 
-Besides `{scenario_id}`, the command and `trace_path` can use these placeholders:
-
-- `{mcp_url}`: the Drill MCP URL
-- `{conversation_id}`: the scenario's support conversation
-- `{output_dir}`: the output directory
-- `{policy_file}`: the workflow rules in plain language, written to `policy.md`
+Target commands follow the [target command adapter contract](docs/target-adapter.md). The contract
+defines the stable placeholders, ATIF output, environment isolation, and failure behavior.
 
 When the target exits, the job writes `drill-run.json`, `recorded-run.json`, `result.json`, and
 `report.md` to the output directory. It takes the agent name and version from the target's ATIF

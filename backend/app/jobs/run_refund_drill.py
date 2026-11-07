@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 
 from app.drill_mcp.facade import DrillProxyService, serve_streamable_http
@@ -11,6 +10,7 @@ from app.drills.facade import (
     DrillConfigError,
     DrillRun,
     DrillRunStatus,
+    TargetRunContext,
     load_command_config,
 )
 from app.evaluations.facade import (
@@ -35,30 +35,6 @@ from app.workflows.facade import (
 LIBRARY_ROOT = Path(__file__).resolve().parents[2] / "fixtures" / "refunds"
 UNIDENTIFIED_AGENT = "unidentified-target"
 UNKNOWN_VERSION = "unknown"
-
-
-@dataclass(frozen=True)
-class TargetValues:
-    mcp_url: str
-    output_dir: Path
-    policy_file: Path
-    conversation_id: str
-
-    def fill(self, text: str) -> str:
-        return (
-            text.replace("{mcp_url}", self.mcp_url)
-            .replace("{output_dir}", str(self.output_dir))
-            .replace("{policy_file}", str(self.policy_file))
-            .replace("{conversation_id}", self.conversation_id)
-        )
-
-    def apply(self, config: CommandRunnerConfig) -> CommandRunnerConfig:
-        return config.model_copy(
-            update={
-                "command": tuple(self.fill(part) for part in config.command),
-                "trace_path": Path(self.fill(str(config.trace_path))),
-            }
-        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -117,9 +93,17 @@ async def _drill(
     await proxy.initialize()
     try:
         async with serve_streamable_http(proxy, run.id) as url:
-            values = TargetValues(url, output, policy_file, scenario.conversation_id)
-            runner = CommandDrillRunner(values.apply(config))
-            drill = await asyncio.to_thread(runner.run, scenario.id)
+            context = TargetRunContext(
+                scenario_id=scenario.id,
+                task=(
+                    f"A customer is waiting in support conversation "
+                    f"{scenario.conversation_id}. Resolve their request."
+                ),
+                mcp_url=url,
+                trace_path=output / "trajectory.json",
+                policy_file=policy_file,
+            )
+            drill = await asyncio.to_thread(CommandDrillRunner(config).run, context)
         finished = await _finish(simulations, run.id, world)
     finally:
         await proxy.close()

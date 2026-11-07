@@ -6,7 +6,14 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from app.drills.facade import CommandDrillRunner, CommandRunnerConfig, DrillRunStatus
+from pydantic import ValidationError
+
+from app.drills.facade import (
+    CommandDrillRunner,
+    CommandRunnerConfig,
+    DrillRunStatus,
+    TargetRunContext,
+)
 from app.jobs.run_drill import main
 from app.traces.facade import load_atif
 
@@ -22,7 +29,7 @@ class DrillControlTests(unittest.TestCase):
             shutil.copy(TRACE_FIXTURE, root / "trace.json")
             config = self._config(root, (sys.executable, "-c", "print('target ran')"))
 
-            result = CommandDrillRunner(config).run("scenario-1")
+            result = CommandDrillRunner(config).run(TargetRunContext(scenario_id="scenario-1"))
 
         self.assertEqual(result.status, DrillRunStatus.COMPLETED)
         self.assertEqual(result.exit_code, 0)
@@ -30,23 +37,66 @@ class DrillControlTests(unittest.TestCase):
         self.assertEqual(result.agent_name, "shopping-agent")
         self.assertEqual(result.agent_version, "fixture-v1")
 
-    def test_passes_scenario_as_command_placeholder(self) -> None:
+    def test_supplies_the_stable_adapter_placeholders(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             shutil.copy(TRACE_FIXTURE, root / "trace.json")
-            command = (sys.executable, "-c", "import sys; print(sys.argv[1])", "{scenario_id}")
+            policy = root / "policy.md"
+            command = (
+                sys.executable,
+                "-c",
+                "import sys; print('|'.join(sys.argv[1:]))",
+                "{scenario_id}",
+                "{task}",
+                "{mcp_url}",
+                "{trace_path}",
+                "{output_dir}",
+                "{policy_file}",
+            )
+            context = TargetRunContext(
+                scenario_id="scenario-2",
+                task="Resolve the request.",
+                mcp_url="http://127.0.0.1:8000/mcp",
+                trace_path=root / "trace.json",
+                policy_file=policy,
+            )
 
-            result = CommandDrillRunner(self._config(root, command)).run("scenario-2")
+            result = CommandDrillRunner(self._config(root, command)).run(context)
 
         self.assertEqual(result.status, DrillRunStatus.COMPLETED)
-        self.assertEqual(result.stdout, "scenario-2\n")
+        resolved_root = root.resolve()
+        self.assertEqual(
+            result.stdout,
+            (
+                f"scenario-2|Resolve the request.|http://127.0.0.1:8000/mcp|"
+                f"{resolved_root / 'trace.json'}|{resolved_root}|{policy.resolve()}\n"
+            ),
+        )
+
+    def test_reports_a_missing_adapter_value_before_start(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            command = (sys.executable, "-c", "pass", "{mcp_url}")
+
+            result = CommandDrillRunner(self._config(root, command)).run(
+                TargetRunContext(scenario_id="scenario-missing")
+            )
+
+        self.assertEqual(result.status, DrillRunStatus.FAILED)
+        self.assertIn("requires {mcp_url}", result.error)
+
+    def test_rejects_an_unknown_adapter_placeholder(self) -> None:
+        with tempfile.TemporaryDirectory() as directory, self.assertRaises(ValidationError):
+            self._config(Path(directory), (sys.executable, "{unknown_value}"))
 
     def test_reports_nonzero_exit(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             command = (sys.executable, "-c", "import sys; sys.exit(3)")
 
-            result = CommandDrillRunner(self._config(root, command)).run("scenario-3")
+            result = CommandDrillRunner(self._config(root, command)).run(
+                TargetRunContext(scenario_id="scenario-3")
+            )
 
         self.assertEqual(result.status, DrillRunStatus.FAILED)
         self.assertEqual(result.exit_code, 3)
@@ -58,7 +108,7 @@ class DrillControlTests(unittest.TestCase):
             command = (sys.executable, "-c", "import time; time.sleep(1)")
             config = self._config(root, command, timeout_seconds=0.01)
 
-            result = CommandDrillRunner(config).run("scenario-4")
+            result = CommandDrillRunner(config).run(TargetRunContext(scenario_id="scenario-4"))
 
         self.assertEqual(result.status, DrillRunStatus.TIMED_OUT)
         self.assertIsNone(result.exit_code)
@@ -69,7 +119,7 @@ class DrillControlTests(unittest.TestCase):
             root = Path(directory)
             config = self._config(root, (sys.executable, "-c", "pass"))
 
-            result = CommandDrillRunner(config).run("scenario-5")
+            result = CommandDrillRunner(config).run(TargetRunContext(scenario_id="scenario-5"))
 
         self.assertEqual(result.status, DrillRunStatus.FAILED)
         self.assertEqual(result.exit_code, 0)
@@ -85,7 +135,9 @@ class DrillControlTests(unittest.TestCase):
                 "import os; print(os.getenv('AGENT_DRILL_TEST_SECRET'))",
             )
             with patch.dict("os.environ", {"AGENT_DRILL_TEST_SECRET": "hidden"}):
-                result = CommandDrillRunner(self._config(root, command)).run("scenario-safe")
+                result = CommandDrillRunner(self._config(root, command)).run(
+                    TargetRunContext(scenario_id="scenario-safe")
+                )
 
         self.assertEqual(result.status, DrillRunStatus.COMPLETED)
         self.assertEqual(result.stdout, "None\n")
@@ -100,7 +152,12 @@ class DrillControlTests(unittest.TestCase):
                 json.dumps(
                     {
                         "kind": "command",
-                        "command": [sys.executable, "-c", "print('target ran')"],
+                        "command": [
+                            sys.executable,
+                            "-c",
+                            "import sys; print(sys.argv[1])",
+                            "{task}",
+                        ],
                         "working_directory": ".",
                         "timeout_seconds": 5,
                         "trace_path": "trace.json",
@@ -109,12 +166,20 @@ class DrillControlTests(unittest.TestCase):
             )
 
             exit_code = main(
-                [str(config_path), "scenario-6", "--output", str(result_path)]
+                [
+                    str(config_path),
+                    "scenario-6",
+                    "--task",
+                    "Resolve the request.",
+                    "--output",
+                    str(result_path),
+                ]
             )
 
             result = json.loads(result_path.read_text())
             self.assertEqual(exit_code, 0)
             self.assertEqual(result["status"], "completed")
+            self.assertEqual(result["stdout"], "Resolve the request.\n")
             self.assertEqual(
                 load_atif(Path(result["trace_path"])).agent.name,
                 "shopping-agent",

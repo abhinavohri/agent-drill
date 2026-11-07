@@ -7,14 +7,14 @@ production incidents. This directory runs it as a target agent on the refund sce
 ## How it works
 
 `app.jobs.run_refund_drill` serves the scenario's refund tools over MCP streamable HTTP and runs
-`run_target.py`. The adapter:
+`run_target.py`. It follows the
+[target command adapter contract](../../backend/docs/target-adapter.md). The adapter:
 
 1. writes a HolmesGPT config that points at the Drill MCP URL and turns off HolmesGPT's host
    toolsets (`bash`, `docker/core`, `internet`, `connectivity_check`, `skills`, and
    `kubernetes/kube-prometheus-stack`), so HolmesGPT can use only the drill tools and its own
    TodoWrite planner
-2. runs `holmes ask` with the task "A customer is waiting in support conversation
-   {conversation_id}. Resolve their request."
+2. runs `holmes ask` with the task supplied through the stable `{task}` adapter placeholder
 3. converts HolmesGPT's JSON answer into an ATIF v1.7 trajectory
 
 Three HolmesGPT behaviors shape this setup:

@@ -6,13 +6,13 @@
     "--mcp-url",
     "{mcp_url}",
     "--prompt",
-    "A customer is waiting in support conversation {conversation_id}. Resolve their request.",
+    "{task}",
     "--trace",
-    "{output_dir}/trajectory.json"
+    "{trace_path}"
   ],
   "working_directory": ".",
   "inherit_environment": ["PATH", "ANTHROPIC_API_KEY"],
   "environment": {},
   "timeout_seconds": 600,
-  "trace_path": "{output_dir}/trajectory.json"
+  "trace_path": "trajectory.json"
 }
