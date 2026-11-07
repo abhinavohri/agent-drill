@@ -36,7 +36,7 @@ Its facade exports `WorkflowSpec`, `Scenario`, `AgentScript`, the policy and rev
 
 ## Evaluations
 
-`app/evaluations/` owns deterministic run evaluation, pass, fail, and review verdicts, run comparison, and Markdown reports. It reads recorded runs. It does not call tools, network services, or language models.
+`app/evaluations/` owns deterministic run evaluation, pass, fail, and review verdicts, run comparison, Markdown run reports, and batch summaries. It reads recorded runs. It does not call tools, network services, or language models.
 
 Its facade exports `evaluate_run`, `compare_results`, the report renderers, and the `RecordedRun`, `ReviewInput`, `RunResult`, and `RunComparison` contracts.
 

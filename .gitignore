@@ -8,3 +8,4 @@ __pycache__/
 # External datasets have separate usage terms.
 backend/fixtures/external/**/*.json
 
+backend/runs/

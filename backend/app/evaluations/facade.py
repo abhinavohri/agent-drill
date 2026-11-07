@@ -1,3 +1,4 @@
+from app.evaluations.internal.batch_report import render_batch_summary
 from app.evaluations.internal.comparison import ComparisonError, compare_results
 from app.evaluations.internal.comparison_report import render_comparison
 from app.evaluations.internal.context import EvaluationInputError
@@ -41,6 +42,7 @@ __all__ = [
     "Verdict",
     "compare_results",
     "evaluate_run",
+    "render_batch_summary",
     "render_comparison",
     "render_run_report",
 ]
