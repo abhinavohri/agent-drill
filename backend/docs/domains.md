@@ -29,6 +29,9 @@ Its facade exports the refund tool provider, refund world, scenario state and to
 
 `app/workflows/` owns workflow specifications, the scenario and policy library, and the scripted target-agent runs in `fixtures/refunds/`. Its parser validates each library file and the references between files.
 
+It also owns the `AdHocScenario` contract. This contract defines a task and declarative environment
+conditions. It does not define an agent path or fixed tool responses.
+
 Its facade exports `WorkflowSpec`, `Scenario`, `AgentScript`, the policy and review rule types, and the library loader.
 
 ## Evaluations

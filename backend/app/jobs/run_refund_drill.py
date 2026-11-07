@@ -3,14 +3,10 @@ import asyncio
 import sys
 from pathlib import Path
 
-from app.drill_mcp.facade import DrillProxyService, serve_streamable_http
 from app.drills.facade import (
-    CommandDrillRunner,
-    CommandRunnerConfig,
     DrillConfigError,
     DrillRun,
     DrillRunStatus,
-    TargetRunContext,
     load_command_config,
 )
 from app.evaluations.facade import (
@@ -21,12 +17,11 @@ from app.evaluations.facade import (
     evaluate_run,
     render_run_report,
 )
-from app.refunds.facade import RefundScenario, RefundToolProvider, RefundWorld
-from app.simulations.facade import MockSandbox, RunStatus, SimulationRun, SimulationService
+from app.jobs.refund_runtime import run_refund_target
+from app.refunds.facade import RefundScenario
 from app.traces.facade import load_atif
 from app.workflows.facade import (
     LibraryError,
-    Scenario,
     UnknownRecordError,
     WorkflowSpec,
     load_scenario_library,
@@ -51,7 +46,28 @@ def main(argv: list[str] | None = None) -> int:
         policy_file.write_text(_policy(workflow))
     except (OSError, DrillConfigError, LibraryError, UnknownRecordError) as exc:
         parser.error(str(exc))
-    drill, recorded = asyncio.run(_drill(config, scenario, output, policy_file))
+    drill, finished = asyncio.run(
+        run_refund_target(
+            config,
+            RefundScenario(
+                id=scenario.id,
+                initial_state=scenario.initial_state,
+                faults=list(scenario.faults),
+            ),
+            (
+                f"A customer is waiting in support conversation "
+                f"{scenario.conversation_id}. Resolve their request."
+            ),
+            output / "trajectory.json",
+            policy_file,
+        )
+    )
+    recorded = RecordedRun(
+        agent_id=drill.agent_name or UNIDENTIFIED_AGENT,
+        agent_version=drill.agent_version or UNKNOWN_VERSION,
+        workflow_id=scenario.workflow_id,
+        run=finished,
+    )
     (output / "drill-run.json").write_text(drill.model_dump_json(indent=2, exclude_none=True) + "\n")
     (output / "recorded-run.json").write_text(recorded.model_dump_json(indent=2) + "\n")
     try:
@@ -72,54 +88,6 @@ def main(argv: list[str] | None = None) -> int:
         f"outcome {result.outcome or 'none'}\n"
     )
     return 0 if drill.status is DrillRunStatus.COMPLETED else 1
-
-
-async def _drill(
-    config: CommandRunnerConfig,
-    scenario: Scenario,
-    output: Path,
-    policy_file: Path,
-) -> tuple[DrillRun, RecordedRun]:
-    world = RefundWorld(
-        RefundScenario(
-            id=scenario.id,
-            initial_state=scenario.initial_state,
-            faults=list(scenario.faults),
-        )
-    )
-    simulations = SimulationService(MockSandbox())
-    run = await simulations.start_run(scenario.id)
-    proxy = DrillProxyService(RefundToolProvider(world), simulations)
-    await proxy.initialize()
-    try:
-        async with serve_streamable_http(proxy, run.id) as url:
-            context = TargetRunContext(
-                scenario_id=scenario.id,
-                task=(
-                    f"A customer is waiting in support conversation "
-                    f"{scenario.conversation_id}. Resolve their request."
-                ),
-                mcp_url=url,
-                trace_path=output / "trajectory.json",
-                policy_file=policy_file,
-            )
-            drill = await asyncio.to_thread(CommandDrillRunner(config).run, context)
-        finished = await _finish(simulations, run.id, world)
-    finally:
-        await proxy.close()
-    recorded = RecordedRun(
-        agent_id=drill.agent_name or UNIDENTIFIED_AGENT,
-        agent_version=drill.agent_version or UNKNOWN_VERSION,
-        workflow_id=scenario.workflow_id,
-        run=finished,
-    )
-    return drill, recorded
-
-
-async def _finish(simulations: SimulationService, run_id: str, world: RefundWorld) -> SimulationRun:
-    if simulations.get_run(run_id).status is RunStatus.RUNNING:
-        return await simulations.complete_run(run_id, world.snapshot())
-    return simulations.get_run(run_id)
 
 
 def _policy(workflow: WorkflowSpec) -> str:

@@ -1,5 +1,6 @@
 """Public interface for the synthetic refund world."""
 
+from app.refunds.internal.factory import prepare_refund_scenario
 from app.refunds.internal.fixtures import load_refund_scenario
 from app.refunds.internal.models import (
     ConversationArguments,
@@ -7,7 +8,9 @@ from app.refunds.internal.models import (
     Order,
     OrderArguments,
     PaymentArguments,
+    PreparedRefundScenario,
     RefundScenario,
+    RefundScenarioSeed,
     RefundState,
     SendCustomerReplyArguments,
     ToolFault,
@@ -23,11 +26,14 @@ __all__ = [
     "Order",
     "OrderArguments",
     "PaymentArguments",
+    "PreparedRefundScenario",
     "RefundScenario",
+    "RefundScenarioSeed",
     "RefundState",
     "RefundToolProvider",
     "RefundWorld",
     "SendCustomerReplyArguments",
     "ToolFault",
     "load_refund_scenario",
+    "prepare_refund_scenario",
 ]

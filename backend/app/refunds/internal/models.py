@@ -1,9 +1,9 @@
 """Validated refund scenario data and synthetic state."""
 
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 
 class RefundModel(BaseModel):
@@ -76,6 +76,28 @@ class RefundScenario(RefundModel):
     id: str
     initial_state: RefundState
     faults: list[ToolFault] = Field(default_factory=list)
+
+
+class RefundScenarioSeed(RefundModel):
+    kind: Literal["refund"] = "refund"
+    order_total_cents: int = Field(gt=0)
+    currency: str = Field(default="USD", min_length=3, max_length=3)
+    delivery_status: str = Field(min_length=1)
+    payment_status: str = Field(min_length=1)
+    prior_refund_cents: int | None = Field(default=None, gt=0)
+    faults: list[ToolFault] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def refund_does_not_exceed_payment(self) -> Self:
+        if self.prior_refund_cents is not None and self.prior_refund_cents > self.order_total_cents:
+            raise ValueError("prior_refund_cents cannot exceed order_total_cents")
+        return self
+
+
+@dataclass(frozen=True)
+class PreparedRefundScenario:
+    conversation_id: str
+    scenario: RefundScenario
 
 
 class ConversationArguments(RefundModel):

@@ -23,3 +23,7 @@ ATIF v1.7 and rejects other versions before application code uses the trajectory
 MCP URL, trace path, and optional policy file for one run. `DrillRun` records the command outcome
 and the validated ATIF artifact metadata. Failed and timed-out states require an error.
 
+`AdHocScenario` defines one generated drill request. `DirectEnvironment` runs a task without external
+tools. `RefundScenarioSeed` defines refund starting conditions and faults. The refund factory creates
+consistent synthetic identifiers and state from that seed. It does not create a scripted conversation.
+

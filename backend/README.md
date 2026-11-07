@@ -65,6 +65,48 @@ result with the execution status, duration, output, and trace metadata. Do not p
 configuration. The target command inherits only the environment variables named in
 `inherit_environment`.
 
+## Run a custom scenario
+
+Create a declarative scenario. A direct environment sends the task to an agent that has no external
+tools:
+
+```json
+{
+  "id": "custom-ticket",
+  "task": "Explain how to extend an active HackerRank assessment.",
+  "environment": {"kind": "direct"}
+}
+```
+
+Run the real target source code:
+
+```sh
+uv run python -m app.jobs.run_ad_hoc_drill \
+  ../targets/may-support-agent/drill.json scenario.json --output runs/custom-ticket
+```
+
+A refund environment defines only starting conditions and faults. Agent Drill creates consistent
+synthetic records and serves stateful tools. It does not script messages, tool calls, or tool results.
+
+```json
+{
+  "id": "captured-payment",
+  "task": "Resolve the customer's refund request.",
+  "environment": {
+    "kind": "refund",
+    "order_total_cents": 12500,
+    "currency": "USD",
+    "delivery_status": "delivered",
+    "payment_status": "captured",
+    "prior_refund_cents": null,
+    "faults": []
+  }
+}
+```
+
+The command writes the normalized scenario, target run, ATIF trace, optional simulation run, and
+Markdown report to the output directory.
+
 ## Drill a target agent on a refund scenario
 
 ```sh

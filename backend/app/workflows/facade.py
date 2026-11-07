@@ -28,11 +28,14 @@ from app.workflows.internal.models import (
 )
 
 __all__ = [
+    "AdHocEnvironment",
+    "AdHocScenario",
     "AgentScript",
     "CustomerOrderRule",
     "CustomerReplyReview",
     "DeliveredOrderRule",
     "DisputedPaymentRule",
+    "DirectEnvironment",
     "DuplicateRefundRule",
     "LibraryError",
     "Outcome",
@@ -53,3 +56,4 @@ __all__ = [
     "WorkflowSpec",
     "load_scenario_library",
 ]
+from app.workflows.internal.ad_hoc import AdHocEnvironment, AdHocScenario, DirectEnvironment
