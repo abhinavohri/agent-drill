@@ -126,6 +126,37 @@ When the target exits, the job writes `drill-run.json`, `recorded-run.json`, `re
 `report.md` to the output directory. It takes the agent name and version from the target's ATIF
 trace. If the target fails, the job still records and grades the run, and it exits with code 1.
 
+## Review a batch of drills
+
+Drill several scenarios into one batch directory, then grade the batch:
+
+```sh
+uv run python -m app.jobs.run_refund_drill ../targets/holmesgpt/drill-with-policy.json \
+  valid-refund --output runs/holmesgpt-policy-1/valid-refund
+uv run python -m app.jobs.review_drills runs/holmesgpt-policy-1
+```
+
+The job grades every `recorded-run.json` under the directory, rewrites each run's `result.json`
+and `report.md`, and writes and prints `summary.md`. The summary lists the failed runs, the runs
+that wait for review, and the passed runs. Its `Release:` line says whether the release is
+approved, waiting for review, or blocked.
+
+Record the team's decisions in a review file and grade the batch again:
+
+```json
+{"decisions": [{"reviewer": "abhinav", "role": "finance", "decision": "approve"}]}
+```
+
+```sh
+uv run python -m app.jobs.review_drills runs/holmesgpt-policy-1 \
+  --review runs/holmesgpt-policy-1/review.json
+```
+
+The decisions apply to every run in the batch. They resolve only the review checks, so a failed
+run stays failed. The job keeps the drill metrics from each run's earlier `result.json`. Git
+ignores `backend/runs/`. The [Switch release review](../switch/README.md) runs these commands from
+a team chat room.
+
 ## Evaluate a saved run
 
 ```sh
